@@ -72,3 +72,17 @@ export const getNotifications = async (req, res, next) => {
     next(error);
   }
 };
+
+export const notificationRead = async (req, res, next) => {
+  const { id } = req.params;
+  try {
+    await pool.query(`UPDATE notifications SET is_seen = true WHERE id = $1`, [
+      id,
+    ]);
+
+    successResponse(res, 200, "Updated succesfully");
+  } catch (error) {
+    console.log("Notification read error:", error);
+    next(error);
+  }
+};

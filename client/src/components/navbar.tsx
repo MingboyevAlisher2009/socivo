@@ -16,7 +16,7 @@ const Navbar = () => {
           initial={{ y: -80 }}
           animate={{ y: 0 }}
           transition={{ duration: 0.5, ease: "easeOut" }}
-          className="md:w-7xl w-[95%] fixed left-1/2 -translate-x-1/2 z-50 top-4 border border-border bg-white/10 dark:bg-black/10 backdrop-blur-md flex justify-between items-center px-4 md:px-6 py-3 md:py-4 rounded-2xl shadow-lg"
+          className="xl:w-7xl w-[95%] fixed left-1/2 -translate-x-1/2 z-50 top-4 border border-border bg-white/10 dark:bg-black/10 backdrop-blur-md flex justify-between items-center px-4 md:px-6 py-3 md:py-4 rounded-2xl shadow-lg"
         >
           {/* Logo */}
           <div>

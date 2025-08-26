@@ -217,15 +217,26 @@ export const toggleFollow = async (req, res, next) => {
     );
 
     if (rows.length) {
-      await pool.query(`DELETE FROM follow WHERE id = $1;`, [rows[0].id]);
-      return successResponse(
-        res,
-        200,
-        `You successfully unfollowed user ${id}`
+      const { rows: user } = await pool.query(
+        `WITH inserted AS (
+          DELETE FROM follow WHERE id = $1
+          RETURNING follower_id, following_id
+        )
+        SELECT f.id, f.username, f.email, f.first_name, f.last_name, f.avatar, f.bio 
+        FROM inserted 
+        LEFT JOIN users AS f ON inserted.following_id = f.id;`,
+        [rows[0].id]
       );
+
+      return successResponse(res, 200, { ...user[0], type: "unfollow" });
     } else {
-      await pool.query(
-        `INSERT INTO follow (follower_id, following_id) VALUES ($1, $2)`,
+      const { rows: user } = await pool.query(
+        `WITH inserted AS (
+        INSERT INTO follow (follower_id, following_id) VALUES ($1, $2) RETURNING follower_id, following_id
+        )
+        
+        SELECT f.id, f.username, f.email, f.first_name, f.last_name, f.avatar, f.bio FROM inserted 
+        LEFT JOIN users f ON inserted.following_id = f.id;`,
         [userId, id]
       );
 
@@ -262,9 +273,8 @@ export const toggleFollow = async (req, res, next) => {
         [userId, id, "follow"]
       );
 
-      console.log(rows);
       sendNotifications(rows[0]);
-      return successResponse(res, 201, `You successfully followed user ${id}`);
+      return successResponse(res, 201, { ...user[0], type: "follow" });
     }
   } catch (error) {
     console.log("Toggle following error:", error);

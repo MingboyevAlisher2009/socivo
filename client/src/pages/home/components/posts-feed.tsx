@@ -22,6 +22,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import type { Comment } from "@/types";
+import Image from "@/components/image";
 
 export default function PostsFeed() {
   const {
@@ -216,11 +217,8 @@ export default function PostsFeed() {
                   <CardContent className="grid gap-4">
                     <p className="text-sm">{post.content}</p>
                     {post.image && (
-                      <img
-                        src={`${BASE_URL}/${post.image}` || "/placeholder.svg"}
-                        alt="Post image"
-                        width={600}
-                        height={400}
+                      <Image
+                        url={`${BASE_URL}/${post.image}`}
                         className="rounded-md object-cover w-full max-h-[40rem]"
                       />
                     )}

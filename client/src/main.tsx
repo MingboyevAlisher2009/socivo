@@ -17,7 +17,7 @@ createRoot(document.getElementById("root")!).render(
           <App />
         </main>
         <DockMenu />
-        <Toaster />
+        <Toaster position="top-right" />
       </SocketProvider>
     </ThemeProvider>
   </BrowserRouter>

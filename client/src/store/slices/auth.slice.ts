@@ -6,11 +6,14 @@ import type { StateCreator } from "zustand";
 
 export interface AuthSlice {
     userInfo: IUser | null;
+    suggestedUsers: IUser[] | null
     loading: boolean;
+    suggestedLoading: boolean;
     loginLoading: boolean;
     signUpLoading: boolean;
     verificationLoading: boolean;
     getUserInfo: (identify?: string) => Promise<IUser | null>;
+    getSuggestedUsers: () => Promise<IUser[] | null>
     setUserInfo: (userInfo: IUser) => void;
     setLoading: (loading: boolean) => void;
     setLoginLoading: (loading: boolean) => void;
@@ -23,7 +26,9 @@ export interface AuthSlice {
 
 const authSlice: StateCreator<AuthSlice> = (set, get) => ({
     userInfo: null,
+    suggestedUsers: null,
     loading: false,
+    suggestedLoading: false,
     loginLoading: false,
     signUpLoading: false,
     verificationLoading: false,
@@ -124,6 +129,20 @@ const authSlice: StateCreator<AuthSlice> = (set, get) => ({
             set({ loading: false });
         }
     },
+
+    getSuggestedUsers: async () => {
+        set({ suggestedLoading: true })
+        try {
+            const { data } = await axiosInstance.get("/auth/suggested-users")
+            set({ suggestedUsers: data.data })
+            return data.data
+        } catch (error) {
+            console.log(error);
+            set({ suggestedUsers: null })
+        } finally {
+            set({ suggestedLoading: false })
+        }
+    }
 });
 
 export default authSlice;

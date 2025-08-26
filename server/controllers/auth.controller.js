@@ -242,6 +242,21 @@ export const getMe = async (req, res, next) => {
   }
 };
 
+export const getSuggestedUsers = async (req, res, next) => {
+  const { userId } = req;
+
+  try {
+    const { rows } = await pool.query(
+      `SELECT * FROM users WHERE id <> $1 ORDER BY RANDOM() LIMIT 5;`,
+      [userId]
+    );
+    successResponse(res, 200, rows);
+  } catch (error) {
+    console.log("Suggested error:", error);
+    next(error);
+  }
+};
+
 export const search = async (req, res, next) => {
   const { userId } = req;
   const { identify } = req.params;

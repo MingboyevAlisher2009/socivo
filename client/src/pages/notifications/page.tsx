@@ -1,12 +1,14 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Heart, MessageCircle, UserPlus, Bell, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAppStore } from "@/store";
-import { BASE_URL } from "@/http/axios";
+import axiosInstance, { BASE_URL } from "@/http/axios";
 import { NotificationsSkeleton } from "./components/notifications-skeleton";
+import Image from "@/components/image";
+import { Link } from "react-router-dom";
 
 const getNotificationIcon = (type: string) => {
   switch (type) {
@@ -54,13 +56,34 @@ const formatTimeAgo = (dateString: string) => {
 };
 
 const Notifications = () => {
-  const { notifications, notificatoinLoading } =
+  const { notifications, setNotifications, notificatoinLoading } =
     useAppStore();
   const [filter, setFilter] = useState<"all" | "unread">("all");
 
   if (notificatoinLoading) {
     return <NotificationsSkeleton />;
   }
+
+  const handleReadNotification = async () => {
+    if (!notifications || notifications.length === 0) return;
+
+    try {
+      await Promise.all(
+        notifications
+          .filter((n) => !n.is_seen)
+          .map((n) => axiosInstance.put(`/notifications/read/${n.id}`))
+      );
+
+      const notificationsRead = notifications.map((n) => ({
+        ...n,
+        is_seen: true,
+      }));
+      setNotifications(notificationsRead);
+    } catch (error) {
+      console.error("Failed to mark notifications as read:", error);
+      setNotifications(notifications ?? []);
+    }
+  };
 
   const filteredNotifications =
     filter === "unread"
@@ -70,6 +93,10 @@ const Notifications = () => {
       : notifications || [];
   const unreadCount =
     (notifications && notifications.filter((n) => !n.is_seen).length) || 0;
+
+  useEffect(() => {
+    handleReadNotification();
+  }, [unreadCount]);
 
   return (
     <div className="max-w-2xl mx-auto space-y-6 p-6">
@@ -176,9 +203,12 @@ const Notifications = () => {
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
-                        <p className="text-sm font-medium text-foreground">
+                        <Link
+                          to={`/profile/${notification.sender.username}`}
+                          className="text-sm font-medium text-foreground"
+                        >
                           {getNotificationMessage(notification)}
-                        </p>
+                        </Link>
                         {!notification.is_seen && (
                           <div className="h-2 w-2 bg-primary rounded-full flex-shrink-0" />
                         )}
@@ -194,12 +224,8 @@ const Notifications = () => {
 
                       {notification.post && notification.post.id && (
                         <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg mt-2">
-                          <img
-                            src={
-                              `${BASE_URL}/${notification.post.image}` ||
-                              "/placeholder.svg"
-                            }
-                            alt="Post"
+                          <Image
+                            url={`${BASE_URL}/${notification.post.image}`}
                             className="h-14 w-14 rounded-lg object-cover border"
                           />
                           <div className="flex-1 min-w-0">
@@ -218,23 +244,6 @@ const Notifications = () => {
                           {formatTimeAgo(notification.created_at)}
                         </p>
                       </div>
-                    </div>
-
-                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all duration-200">
-                      {!notification.is_seen && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          //   onClick={(e) => {
-                          //     e.stopPropagation();
-                          //     markAsRead(notification.id);
-                          //   }}
-                          className="h-8 w-8 p-0 hover:bg-primary/10 hover:text-primary"
-                          title="Mark as read"
-                        >
-                          <Check className="h-4 w-4" />
-                        </Button>
-                      )}
                     </div>
                   </div>
                 </div>
