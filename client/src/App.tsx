@@ -9,6 +9,8 @@ import { Shield } from "lucide-react";
 import Search from "./pages/search/page";
 import Profile from "./pages/profile/page";
 import Notifications from "./pages/notifications/page";
+import Post from "./pages/post/page";
+import NotFoundPage from "./pages/page-not-found/page";
 
 const LoadingScreen = () => (
   <div className="fixed inset-0 z-50 w-full h-screen flex items-center justify-center bg-background backdrop-blur-sm">
@@ -81,6 +83,14 @@ const App = () => {
           }
         />
         <Route
+          path="/post/:id"
+          element={
+            <PrivateRoute>
+              <Post />
+            </PrivateRoute>
+          }
+        />
+        <Route
           path="/search"
           element={
             <PrivateRoute>
@@ -123,6 +133,7 @@ const App = () => {
             }
           />
         </Route>
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </>
   );

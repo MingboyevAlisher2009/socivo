@@ -39,6 +39,7 @@ export interface Comment {
 
 export interface Post {
     id: string;
+    post_id: string
     user_id: string;
     content: string;
     image: string | null;
@@ -49,6 +50,7 @@ export interface Post {
     isLiked: boolean
     comments: Comment[]
     author: {
+        id: string
         email: string;
         username: string;
         first_name: string | null;

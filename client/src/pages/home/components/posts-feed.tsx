@@ -21,8 +21,9 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import type { Comment } from "@/types";
+import type { Comment, Post } from "@/types";
 import Image from "@/components/image";
+import { ShareModal } from "@/components/share-modal";
 
 export default function PostsFeed() {
   const {
@@ -33,6 +34,13 @@ export default function PostsFeed() {
     handleComment,
     commentLoading,
   } = useAppStore();
+  const [open, setOpen] = useState(false);
+  const [post, setPost] = useState<Post | null>(null);
+
+  const handleOpenModal = (post: Post) => {
+    setOpen(true);
+    setPost(post);
+  };
 
   const formatTimeAgo = (timestamp: string) => {
     const date = new Date(timestamp);
@@ -157,123 +165,141 @@ export default function PostsFeed() {
   );
 
   return (
-    <div className="space-y-4">
-      {isLoading && <PostsFeedSkeleton />}
-      {!isLoading && posts && posts.length === 0 && (
-        <div className="flex items-center justify-center h-48 text-muted-foreground">
-          No posts found.
-        </div>
-      )}
-      <AnimatePresence>
-        {!isLoading &&
-          posts &&
-          posts &&
-          posts.map((post, i) => {
-            const displayName =
-              post.author?.first_name && post.author?.last_name
-                ? `${post.author.first_name} ${post.author.last_name}`
-                : post.author?.username;
+    <>
+      <div className="space-y-4">
+        {isLoading && <PostsFeedSkeleton />}
+        {!isLoading && posts && posts.length === 0 && (
+          <div className="flex items-center justify-center h-48 text-muted-foreground">
+            No posts found.
+          </div>
+        )}
+        <AnimatePresence>
+          {!isLoading &&
+            posts &&
+            posts &&
+            posts.map((post, i) => {
+              const displayName =
+                post.author?.first_name && post.author?.last_name
+                  ? `${post.author.first_name} ${post.author.last_name}`
+                  : post.author?.username;
 
-            return (
-              <motion.div
-                key={post.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.5, ease: "easeOut", delay: i * 0.05 }}
-              >
-                <Card className="w-full">
-                  <CardHeader>
-                    <Link
-                      to={`/profile/${post.author.username}`}
-                      className="flex flex-row items-center gap-3 pb-4"
-                    >
-                      <Avatar className="h-10 w-10">
-                        <AvatarImage
-                          className="object-cover"
-                          src={`${BASE_URL}/${post.author.avatar}`}
-                          alt={`@${post.author.username}`}
+              return (
+                <motion.div
+                  key={post.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{
+                    duration: 0.5,
+                    ease: "easeOut",
+                    delay: i * 0.05,
+                  }}
+                >
+                  <Card className="w-full">
+                    <CardHeader>
+                      <Link
+                        to={`/profile/${post.author.username}`}
+                        className="flex flex-row items-center gap-3 pb-4"
+                      >
+                        <Avatar className="h-10 w-10">
+                          <AvatarImage
+                            className="object-cover"
+                            src={`${BASE_URL}/${post.author.avatar}`}
+                            alt={`@${post.author.username}`}
+                          />
+                          <AvatarFallback>
+                            {post.author?.first_name && post.author?.last_name
+                              ? `${post.author.first_name.charAt(
+                                  0
+                                )}${post.author.last_name
+                                  .charAt(0)
+                                  .toUpperCase()}`
+                              : post.author.username.charAt(0).toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="grid gap-0.5">
+                          <p className="text-sm font-medium leading-none">
+                            {displayName}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {formatTimeAgo(post.created_at)}
+                          </p>
+                        </div>
+                      </Link>
+                    </CardHeader>
+                    <CardContent className="grid gap-4">
+                      <p className="text-sm">{post.content}</p>
+                      {post.image && (
+                        <Image
+                          url={`${BASE_URL}/${post.image}`}
+                          className="rounded-md object-cover w-full max-h-[40rem]"
                         />
-                        <AvatarFallback>
-                          {post.author?.first_name && post.author?.last_name
-                            ? `${post.author.first_name.charAt(
-                                0
-                              )}${post.author.last_name
-                                .charAt(0)
-                                .toUpperCase()}`
-                            : post.author.username.charAt(0).toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="grid gap-0.5">
-                        <p className="text-sm font-medium leading-none">
-                          {displayName}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          {formatTimeAgo(post.created_at)}
-                        </p>
-                      </div>
-                    </Link>
-                  </CardHeader>
-                  <CardContent className="grid gap-4">
-                    <p className="text-sm">{post.content}</p>
-                    {post.image && (
-                      <Image
-                        url={`${BASE_URL}/${post.image}`}
-                        className="rounded-md object-cover w-full max-h-[40rem]"
-                      />
-                    )}
-                  </CardContent>
-                  <CardFooter className="flex items-center gap-4 pt-4 border-t">
-                    <button
-                      onClick={() => handleLike(post.id)}
-                      className="flex items-center gap-1 text-muted-foreground hover:text-primary cursor-pointer"
-                    >
-                      <Heart
-                        className={`${
-                          post.isLiked && "text-primary  fill-primary"
-                        } h-5 w-5`}
-                      />
-                      <span className="text-sm">{post.likes_count}</span>
-                    </button>
-                    <Dialog>
-                      <DialogTrigger asChild>
-                        <button className="flex items-center gap-1 text-muted-foreground hover:text-primary cursor-pointer transition-colors">
-                          <MessageCircle className="h-5 w-5" />
-                          <span className="text-sm">{post.comments_count}</span>
-                        </button>
-                      </DialogTrigger>
-                      <DialogContent className="sm:max-w-lg max-h-[80vh] overflow-y-auto">
-                        <motion.div
-                          initial={{ opacity: 0, scale: 0.95 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          exit={{ opacity: 0, scale: 0.95 }}
-                          transition={{ duration: 0.2 }}
-                        >
-                          <DialogHeader>
-                            <DialogTitle className="flex items-center gap-2">
-                              <MessageCircle className="h-5 w-5" />
-                              Comments ({post.comments_count})
-                            </DialogTitle>
-                          </DialogHeader>
-                          <div className="mt-4 space-y-4">
-                            <CommentForm post_id={post.id} />
-                            <div className="space-y-3">
-                              <CommentsList comments={post.comments} />
+                      )}
+                    </CardContent>
+                    <CardFooter className="flex items-center gap-4 pt-4 border-t">
+                      <button
+                        onClick={() => handleLike(post.id)}
+                        className="flex items-center gap-1 text-muted-foreground hover:text-primary cursor-pointer"
+                      >
+                        <Heart
+                          className={`${
+                            post.isLiked && "text-primary  fill-primary"
+                          } h-5 w-5`}
+                        />
+                        <span className="text-sm">{post.likes_count}</span>
+                      </button>
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <button className="flex items-center gap-1 text-muted-foreground hover:text-primary cursor-pointer transition-colors">
+                            <MessageCircle className="h-5 w-5" />
+                            <span className="text-sm">
+                              {post.comments_count}
+                            </span>
+                          </button>
+                        </DialogTrigger>
+                        <DialogContent className="sm:max-w-lg max-h-[80vh] overflow-y-auto">
+                          <motion.div
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.95 }}
+                            transition={{ duration: 0.2 }}
+                          >
+                            <DialogHeader>
+                              <DialogTitle className="flex items-center gap-2">
+                                <MessageCircle className="h-5 w-5" />
+                                Comments ({post.comments_count})
+                              </DialogTitle>
+                            </DialogHeader>
+                            <div className="mt-4 space-y-4">
+                              <CommentForm post_id={post.id} />
+                              <div className="space-y-3">
+                                <CommentsList comments={post.comments} />
+                              </div>
                             </div>
-                          </div>
-                        </motion.div>
-                      </DialogContent>
-                    </Dialog>
-                    <div className="flex items-center gap-1 text-muted-foreground hover:text-primary cursor-pointer">
-                      <Share2 className="h-5 w-5" />
-                      <span className="text-sm">Share</span>
-                    </div>
-                  </CardFooter>
-                </Card>
-              </motion.div>
-            );
-          })}
-      </AnimatePresence>
-    </div>
+                          </motion.div>
+                        </DialogContent>
+                      </Dialog>
+                      <div
+                        onClick={() => handleOpenModal(post)}
+                        className="flex items-center gap-1 text-muted-foreground hover:text-primary cursor-pointer"
+                      >
+                        <Share2 className="h-5 w-5" />
+                        <span className="text-sm">Share</span>
+                      </div>
+                    </CardFooter>
+                  </Card>
+                </motion.div>
+              );
+            })}
+        </AnimatePresence>
+      </div>
+      <ShareModal
+        url={`${window.location.href}post/${post?.id}`}
+        title={post?.content}
+        imageUrl={`${BASE_URL}/${post?.image}`}
+        isOpen={open}
+        onOpenChange={() => setOpen(false)}
+      />
+    </>
   );
 }

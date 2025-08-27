@@ -125,6 +125,7 @@ export const getPosts = async (req, res, next) => {
 };
 
 export const getPostById = async (req, res, next) => {
+  const { userId } = req;
   const { id } = req.params;
 
   try {
@@ -132,10 +133,72 @@ export const getPostById = async (req, res, next) => {
       return errorResponse(res, 404, "Post id is required.");
     }
 
-    const { rows } = await pool.query(`SELECT * from posts WHERE id = $1;`, id);
-    const post = rows[0];
+    const { rows } = await pool.query(
+      `SELECT 
+        posts.*, 
+        json_build_object(
+          'id', users.id,
+          'username', users.username,
+          'email', users.email,
+          'first_name', users.first_name,
+          'last_name', users.last_name,
+          'avatar', users.avatar,
+          'bio', users.bio
+        ) AS author,
 
-    successResponse(res, 200, post);
+        COALESCE(
+        json_agg(
+            DISTINCT jsonb_build_object(
+          'id', likes.id,
+          'user_id', like_users.id,
+          'username', like_users.username,
+          'email', like_users.email,
+          'first_name', like_users.first_name,
+          'last_name', like_users.last_name,
+          'avatar', like_users.avatar,
+          'liked_at', likes.created_at
+        )
+      ) FILTER (WHERE likes.id IS NOT NULL),
+        '[]'
+      ) AS likes,
+
+        COALESCE(
+          json_agg(
+          DISTINCT jsonb_build_object(
+            'id', comments.id,
+            'author', json_build_object (
+            'user_id', comment_users.id,
+            'username', comment_users.username,
+            'email', comment_users.email,
+            'first_name', comment_users.first_name,
+            'last_name', comment_users.last_name,
+            'avatar', comment_users.avatar
+            ),
+            'comment', comments.comment, 
+            'created_at', comments.created_at
+            ) 
+        ) FILTER (WHERE comments.id IS NOT NULL), '[]'
+        ) AS comments 
+      FROM posts 
+      LEFT JOIN users ON posts.user_id = users.id
+      LEFT JOIN likes ON posts.id = likes.post_id
+      LEFT JOIN users AS like_users ON like_users.id = likes.user_id
+      LEFT JOIN comments ON posts.id = comments.post_id
+      LEFT JOIN users AS comment_users ON comment_users.id = comments.user_id
+      WHERE posts.id = $1
+      GROUP BY posts.id, users.id
+      ;`,
+      [id]
+    );
+    const post = rows[0];
+    const formatedPost = {
+      ...post,
+      isLiked: post.likes.some((like) => like.user_id === userId),
+      likes_count: post.likes.length,
+      comments_count: post.comments.length,
+    };
+
+    successResponse(res, 200, formatedPost);
   } catch (error) {
     console.log("Getting post error: ", error);
     next(error);
@@ -563,11 +626,11 @@ export const deletePost = async (req, res, next) => {
       return errorResponse(res, 404, "Post doesn't exist.");
     }
 
-    if (user.id === post.user_id) {
+    if (user.id !== post.user_id) {
       return errorResponse(res, 403, "Author can delete this post.");
     }
 
-    await pool.query(`DELETE FROM posts WHERE id = $1`, [userId]);
+    await pool.query(`DELETE FROM posts WHERE id = $1`, [id]);
 
     return successResponse(res, 201, "Deleting post failed.");
   } catch (error) {

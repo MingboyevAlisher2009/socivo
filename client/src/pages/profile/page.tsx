@@ -69,7 +69,7 @@ const Profile = () => {
       setUser(data.data);
     } catch (error) {
       navigate(`/profile/${userInfo?.username}`);
-      toast.error("User doesn't exist.")
+      toast.error("User doesn't exist.");
       console.error("Error fetching user info:", error);
       return null;
     }
@@ -448,6 +448,7 @@ const Profile = () => {
               >
                 {user.posts.map((post, index) => (
                   <motion.div
+                    onClick={() => navigate(`/post/${post.post_id}`)}
                     key={index}
                     variants={postVariants}
                     whileHover="hover"
@@ -458,7 +459,7 @@ const Profile = () => {
                         <motion.img
                           src={`${BASE_URL}/${post.image}`}
                           alt={post.content}
-                          className="w-full h-full object-cover"
+                          className="w-full h-52 object-cover"
                           whileHover={{ scale: 1.05 }}
                           transition={{ duration: 0.3 }}
                         />
