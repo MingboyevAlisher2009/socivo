@@ -280,7 +280,8 @@ const PostComponent = () => {
                               <Avatar className="h-9 w-9 ring-2 ring-primary/10">
                                 <AvatarImage
                                   src={
-                                    comment.author.avatar || "/placeholder.svg"
+                                    `${BASE_URL}/${comment.author.avatar}` ||
+                                    "/placeholder.svg"
                                   }
                                   alt={`@${comment.author.username}`}
                                 />
