@@ -25,6 +25,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import DeleteModal from "./components/delete-modal";
+import SeoHead from "@/components/hamlet";
 
 const formatTimeAgo = (timestamp: string) => {
   const date = new Date(timestamp);
@@ -90,6 +91,11 @@ const PostComponent = () => {
 
   return (
     <>
+      <SeoHead
+        title={"Post"}
+        image={`${BASE_URL}/${post?.image}`}
+        description={post?.content}
+      />
       <DeleteModal
         isOpen={deleteModal}
         onClose={() => setdeleteModal(false)}

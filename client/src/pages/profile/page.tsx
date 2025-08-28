@@ -37,6 +37,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { AxiosError } from "axios";
+import SeoHead from "@/components/hamlet";
 
 const Profile = () => {
   const { userInfo, getUserInfo } = useAppStore();
@@ -239,6 +240,12 @@ const Profile = () => {
 
   return (
     <>
+      <SeoHead
+        title={`@${user?.username}`}
+        image={user?.avatar && `${BASE_URL}/${user?.avatar}`}
+        description={user?.bio}
+      />
+
       <motion.div
         className="max-w-4xl mx-auto px-4 py-8"
         variants={containerVariants}
