@@ -630,6 +630,10 @@ export const deletePost = async (req, res, next) => {
       return errorResponse(res, 403, "Author can delete this post.");
     }
 
+    if (post.image && existsSync(post.image)) {
+      unlinkSync(post.image);
+    }
+
     await pool.query(`DELETE FROM posts WHERE id = $1`, [id]);
 
     return successResponse(res, 201, "Deleting post failed.");

@@ -11,7 +11,7 @@ import { AlertTriangle } from "lucide-react";
 
 interface DeletePostDialogProps {
   isOpen: boolean;
-  onClose: () => void;
+  onClose: (isOpen: boolean) => void;
   onConfirm: () => void;
   isLoading?: boolean;
 }
@@ -24,6 +24,9 @@ export default function DeleteModal({
 }: DeletePostDialogProps) {
   const handleConfirm = () => {
     onConfirm();
+    if (isLoading) {
+      onClose(false);
+    }
   };
 
   return (
@@ -45,7 +48,7 @@ export default function DeleteModal({
         <DialogFooter className="gap-3">
           <Button
             variant="outline"
-            onClick={onClose}
+            onClick={() => onClose(false)}
             disabled={isLoading}
             className="px-6 bg-transparent"
           >

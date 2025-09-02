@@ -17,6 +17,7 @@ import { Label } from "./ui/label";
 import { Textarea } from "./ui/textarea";
 import { AxiosError } from "axios";
 import axiosInstance from "@/http/axios";
+import { useAppStore } from "@/store";
 
 interface ModalType {
   isOpen: boolean;
@@ -24,6 +25,7 @@ interface ModalType {
 }
 
 const CreatePostModal = ({ isOpen, onOpenChange }: ModalType) => {
+  const { getUserInfo } = useAppStore();
   const [file, setFile] = useState<any | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -95,10 +97,10 @@ const CreatePostModal = ({ isOpen, onOpenChange }: ModalType) => {
       formData.append("post", file);
       formData.append("content", description);
 
-      const { data } = await axiosInstance.post("/posts", formData);
-      console.log(data);
+      await axiosInstance.post("/posts", formData);
       onOpenChange(false);
       handleImageClear();
+      getUserInfo();
       toast.success("Your post created succesfully.");
     } catch (error) {
       const message =

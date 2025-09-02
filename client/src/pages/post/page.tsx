@@ -57,7 +57,7 @@ const PostComponent = () => {
   } = useAppStore();
   const { id } = useParams();
   const [open, setOpen] = useState(false);
-  const [deleteModal, setdeleteModal] = useState(false);
+  const [deleteModal, setDeleteModal] = useState(false);
   const [commentText, setCommentText] = useState("");
 
   useEffect(() => {
@@ -76,7 +76,6 @@ const PostComponent = () => {
 
   const handleDelete = async () => {
     await handleDeletePost(post?.id || "");
-    setdeleteModal(false);
     getUserInfo();
   };
 
@@ -96,12 +95,7 @@ const PostComponent = () => {
         image={`${BASE_URL}/${post?.image}`}
         description={post?.content}
       />
-      <DeleteModal
-        isOpen={deleteModal}
-        onClose={() => setdeleteModal(false)}
-        onConfirm={handleDelete}
-        isLoading={deletingLoading}
-      />
+
       <div className="max-w-6xl mx-auto px-4 py-6">
         <div className="grid lg:grid-cols-3 grid-cols-1 gap-8">
           <div className="lg:col-span-2 col-span-1 space-y-6">
@@ -137,9 +131,15 @@ const PostComponent = () => {
                         <Ellipsis />
                       </DropdownMenuTrigger>
                       <DropdownMenuContent>
-                        <DropdownMenuItem onClick={() => setdeleteModal(true)}>
-                          <Trash />
-                          Delete
+                        <DropdownMenuItem asChild>
+                          <Button
+                            variant={"ghost"}
+                            onClick={() => setDeleteModal(true)}
+                            className="flex items-center gap-2 w-full"
+                          >
+                            <Trash />
+                            Delete
+                          </Button>
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
@@ -384,6 +384,13 @@ const PostComponent = () => {
           </aside>
         </div>
       </div>
+
+      <DeleteModal
+        isOpen={deleteModal}
+        onClose={setDeleteModal}
+        onConfirm={handleDelete}
+        isLoading={deletingLoading}
+      />
 
       <ShareModal
         isOpen={open}
