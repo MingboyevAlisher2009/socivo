@@ -162,6 +162,24 @@ export const signUp = async (req, res, next) => {
   }
 };
 
+export const logout = async (req, res, next) => {
+  try {
+    res.cookie("jwt", "", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 0,
+    });
+
+    return successResponse(res, 200, {
+      message: "Logged out successfully",
+    });
+  } catch (error) {
+    console.error("Logout error:", error);
+    next(error);
+  }
+};
+
 export const getMe = async (req, res, next) => {
   const { id } = req.params;
   const { userId } = req;

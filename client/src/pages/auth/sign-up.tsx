@@ -34,7 +34,6 @@ const SignUp = () => {
   });
 
   function onSubmit(values: z.infer<typeof signUpSchema>) {
-    console.log(values);
     signUp(values.username.toLowerCase(), values.email, values.password);
   }
 

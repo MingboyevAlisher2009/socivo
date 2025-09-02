@@ -11,6 +11,7 @@ export interface AuthSlice {
     suggestedLoading: boolean;
     loginLoading: boolean;
     signUpLoading: boolean;
+    logoutLoading: boolean
     verificationLoading: boolean;
     getUserInfo: (identify?: string) => Promise<IUser | null>;
     getSuggestedUsers: () => Promise<IUser[] | null>
@@ -22,6 +23,7 @@ export interface AuthSlice {
     login: (email: string, password: string) => Promise<void>;
     verification: (email: string, otp: string) => Promise<void>;
     signUp: (username: string, email: string, password: string) => Promise<void>;
+    logout: () => Promise<void>
 }
 
 const authSlice: StateCreator<AuthSlice> = (set, get) => ({
@@ -31,6 +33,7 @@ const authSlice: StateCreator<AuthSlice> = (set, get) => ({
     suggestedLoading: false,
     loginLoading: false,
     signUpLoading: false,
+    logoutLoading: false,
     verificationLoading: false,
 
     setLoading: (loading) => set({ loading }),
@@ -47,7 +50,6 @@ const authSlice: StateCreator<AuthSlice> = (set, get) => ({
                 email,
                 password,
             });
-            console.log(data);
 
             const isVerified = data.data.is_verified;
 
@@ -91,6 +93,19 @@ const authSlice: StateCreator<AuthSlice> = (set, get) => ({
             toast.error(message);
         } finally {
             set({ signUpLoading: false });
+        }
+    },
+
+    logout: async () => {
+        set({ logoutLoading: true })
+        try {
+            await axiosInstance.post("/auth/logout")
+            window.location.replace("/auth/login")
+        } catch (error) {
+            console.log(error);
+
+        } finally {
+            set({ logoutLoading: false })
         }
     },
 

@@ -33,7 +33,6 @@ const Login = () => {
   });
 
   function onSubmit(values: z.infer<typeof loginSchema>) {
-    console.log(values);
     login(values.email, values.password);
   }
 

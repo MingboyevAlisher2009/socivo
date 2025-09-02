@@ -4,6 +4,7 @@ import {
   getMe,
   getSuggestedUsers,
   login,
+  logout,
   search,
   sendOtp,
   signUp,
@@ -24,6 +25,7 @@ router.post("/login", login);
 router.post("/verify", verifyOtp);
 router.post("/send-otp", sendOtp);
 router.post("/sign-up", signUp);
+router.post("/logout", AuthMiddleware, logout);
 router.post(
   "/upload-avatar",
   AuthMiddleware,

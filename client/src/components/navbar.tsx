@@ -1,12 +1,18 @@
 import { useAppStore } from "@/store";
-import { Leaf } from "lucide-react";
+import { Leaf, Loader2, LogOut } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { BASE_URL } from "@/http/axios";
 import { motion } from "framer-motion";
 import { Link, useLocation } from "react-router-dom";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu";
 
 const Navbar = () => {
-  const { userInfo } = useAppStore();
+  const { userInfo, logout, logoutLoading } = useAppStore();
   const { pathname } = useLocation();
 
   return (
@@ -30,22 +36,37 @@ const Navbar = () => {
 
           {/* Avatar */}
           <div className="cursor-pointer hover:scale-105 active:scale-95 transition-transform">
-            <Avatar>
-              <AvatarImage
-              className="object-cover"
-                src={`${BASE_URL}/${userInfo?.avatar}`}
-                alt={userInfo?.username || "User"}
-              />
-              <AvatarFallback>
-                {userInfo?.first_name && userInfo?.last_name
-                  ? `${userInfo.first_name
-                      .charAt(0)
-                      .toUpperCase()}${userInfo.last_name
-                      .charAt(0)
-                      .toUpperCase()}`
-                  : userInfo?.username.charAt(0).toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Avatar>
+                  <AvatarImage
+                    className="object-cover"
+                    src={`${BASE_URL}/${userInfo?.avatar}`}
+                    alt={userInfo?.username || "User"}
+                  />
+                  <AvatarFallback>
+                    {userInfo?.first_name && userInfo?.last_name
+                      ? `${userInfo.first_name
+                          .charAt(0)
+                          .toUpperCase()}${userInfo.last_name
+                          .charAt(0)
+                          .toUpperCase()}`
+                      : userInfo?.username.charAt(0).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem disabled={logoutLoading} onClick={logout}>
+                  {logoutLoading ? (
+                    <Loader2 className="animate-spin w-5 h-5" />
+                  ) : (
+                    <>
+                      <LogOut /> Logout
+                    </>
+                  )}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </motion.nav>
       )}

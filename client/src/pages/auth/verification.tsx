@@ -33,7 +33,6 @@ export default function Verification() {
   });
 
   const onSubmit = (data: z.infer<typeof verificationSchema>) => {
-    console.log("Submitted OTP:", data.code);
     verification(sessionStorage.getItem("email") || "", data.code);
   };
 
