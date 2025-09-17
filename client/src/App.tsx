@@ -5,18 +5,19 @@ import Home from "./pages/home/page";
 import Login from "./pages/auth/login";
 import SignUp from "./pages/auth/sign-up";
 import Verification from "./pages/auth/verification";
-import { Shield } from "lucide-react";
+import { Leaf } from "lucide-react";
 import Search from "./pages/search/page";
 import Profile from "./pages/profile/page";
 import Notifications from "./pages/notifications/page";
 import Post from "./pages/post/page";
 import NotFoundPage from "./pages/page-not-found/page";
+import Chat from "./pages/chat/page";
 
 const LoadingScreen = () => (
   <div className="fixed inset-0 z-50 w-full h-screen flex items-center justify-center bg-background backdrop-blur-sm">
     <div className="flex flex-col items-center gap-4 p-6 rounded-2xl shadow-xl bg-white/80 dark:bg-zinc-900/80">
       <div className="flex flex-col items-center justify-center gap-2">
-        <Shield className="h-10 w-10 text-primary animate-pulse" />
+        <Leaf className="h-10 w-10 text-primary animate-pulse" />
       </div>
       <p className="text-base font-medium text-muted-foreground animate-pulse">
         Initializing secure session...
@@ -31,7 +32,7 @@ const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
   if (loading) {
     return <LoadingScreen />;
   }
-  if (!userInfo) return <Navigate to="/auth/login" replace />;
+  // if (!userInfo) return <Navigate to="/auth/login" replace />;
 
   return <>{children}</>;
 };
@@ -103,6 +104,14 @@ const App = () => {
           element={
             <PrivateRoute>
               <Notifications />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/direct"
+          element={
+            <PrivateRoute>
+              <Chat />
             </PrivateRoute>
           }
         />

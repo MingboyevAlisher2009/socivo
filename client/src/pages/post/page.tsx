@@ -59,6 +59,7 @@ const PostComponent = () => {
   const [open, setOpen] = useState(false);
   const [deleteModal, setDeleteModal] = useState(false);
   const [commentText, setCommentText] = useState("");
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -126,20 +127,26 @@ const PostComponent = () => {
                     </p>
                   </div>
                   {userInfo?.id === post?.author.id && (
-                    <DropdownMenu>
-                      <DropdownMenuTrigger>
-                        <Ellipsis />
+                    <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant={"ghost"}
+                          className="p-2 rounded-md hover:bg-muted"
+                        >
+                          <Ellipsis />
+                        </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent>
-                        <DropdownMenuItem asChild>
-                          <Button
-                            variant={"ghost"}
-                            onClick={() => setDeleteModal(true)}
-                            className="flex items-center gap-2 w-full"
-                          >
-                            <Trash />
-                            Delete
-                          </Button>
+
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem
+                          onSelect={() => {
+                            setDeleteModal(true);
+                            setMenuOpen(false);
+                          }}
+                          className="gap-2"
+                        >
+                          <Trash />
+                          Delete
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>

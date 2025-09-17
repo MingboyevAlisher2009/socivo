@@ -1,5 +1,12 @@
 import { Dock, DockIcon } from "@/components/magicui/dock";
-import { Heart, HomeIcon, Plus, Search, UserCircle } from "lucide-react";
+import {
+  Heart,
+  HomeIcon,
+  MessageCircle,
+  Plus,
+  Search,
+  UserCircle,
+} from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
@@ -23,8 +30,9 @@ const DockMenu = () => {
   const items = [
     { to: "/", icon: HomeIcon, label: "Home" },
     { to: "/search", icon: Search, label: "Search" },
-    { icon: Plus, label: "Create" },
+    { to: "/direct", icon: MessageCircle, label: "Direct" },
     { to: "/notifications", icon: Heart, label: "Notifications" },
+    { icon: Plus, label: "Create" },
     {
       to: `/profile/${userInfo?.username}`,
       icon: UserCircle,
@@ -39,7 +47,7 @@ const DockMenu = () => {
       {!pathname.startsWith("/auth") && (
         <div
           className={cn(
-            "fixed left-1/2 -translate-x-1/2 z-50",
+            "fixed left-1/2 -translate-x-1/2 z-40",
             isMobile ? "bottom-2" : "bottom-6"
           )}
         >

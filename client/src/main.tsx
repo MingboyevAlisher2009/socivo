@@ -13,7 +13,7 @@ createRoot(document.getElementById("root")!).render(
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
       <SocketProvider>
         <Navbar />
-        <main className="max-w-7xl mx-auto px-2 relative pt-24 pb-24">
+        <main className="max-w-7xl mx-auto relative pt-24 pb-24">
           <App />
         </main>
         <DockMenu />
