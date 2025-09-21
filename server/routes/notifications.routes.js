@@ -5,7 +5,7 @@ import {
   notificationRead,
 } from "../controllers/notifications.controller.js";
 
-const router = Router();
+const router = new Router();
 
 router.get("/", AuthMiddleware, getNotifications);
 router.put("/read/:id", AuthMiddleware, notificationRead);

@@ -4,9 +4,10 @@ import "dotenv/config";
 import cors from "cors";
 import errorMiddleware from "./middleware/error.middleware.js";
 import authRoutes from "./routes/auth.routes.js";
+import contactsRoutes from "./routes/contacts.routes.js";
 import postRoutes from "./routes/posts.routes.js";
+import messagessRoutes from "./routes/message.routes.js";
 import notificationsRoutes from "./routes/notifications.routes.js";
-import rateLimit from "express-rate-limit";
 import setupSocket from "./socket.js";
 
 const app = express();
@@ -35,7 +36,9 @@ app.use("/uploads", express.static("uploads"));
 app.use(errorMiddleware);
 
 app.use("/api/auth", authRoutes);
+app.use("/api/contacts", contactsRoutes);
 app.use("/api/posts", postRoutes);
+app.use("/api/messages", messagessRoutes);
 app.use("/api/notifications", notificationsRoutes);
 
 const PORT = process.env.PORT | 4000;

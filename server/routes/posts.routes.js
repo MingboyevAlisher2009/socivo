@@ -11,7 +11,7 @@ import {
 } from "../controllers/posts.controller.js";
 import multer from "multer";
 
-const router = Router();
+const router = new Router();
 const upload = multer({ dest: "uploads/posts" });
 
 router.get("/", AuthMiddleware, getPosts);

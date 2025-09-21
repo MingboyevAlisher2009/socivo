@@ -15,7 +15,7 @@ import {
 import AuthMiddleware from "../middleware/auth.middleware.js";
 import multer from "multer";
 
-const router = Router();
+const router = new Router();
 const upload = multer({ dest: "uploads/avatars" });
 
 router.get("/suggested-users", AuthMiddleware, getSuggestedUsers);

@@ -32,7 +32,7 @@ const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
   if (loading) {
     return <LoadingScreen />;
   }
-  // if (!userInfo) return <Navigate to="/auth/login" replace />;
+  if (!userInfo) return <Navigate to="/auth/login" replace />;
 
   return <>{children}</>;
 };

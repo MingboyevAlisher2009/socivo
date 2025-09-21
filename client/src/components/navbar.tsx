@@ -55,7 +55,7 @@ const Navbar = () => {
                   </AvatarFallback>
                 </Avatar>
               </DropdownMenuTrigger>
-              <DropdownMenuContent>
+              <DropdownMenuContent align="end">
                 <DropdownMenuItem disabled={logoutLoading} onClick={logout}>
                   {logoutLoading ? (
                     <Loader2 className="animate-spin w-5 h-5" />

@@ -10,6 +10,7 @@ import {
   Camera,
   Edit2,
   Loader2,
+  MessageCircle,
   Trash2,
   UserMinus,
   UserPlus,
@@ -40,7 +41,7 @@ import { AxiosError } from "axios";
 import SeoHead from "@/components/hamlet";
 
 const Profile = () => {
-  const { userInfo, getUserInfo } = useAppStore();
+  const { userInfo, getUserInfo, getMessages } = useAppStore();
   const { username } = useParams();
   const [user, setUser] = useState(userInfo);
   const [isOwnProfile, setIsOwnProfile] = useState(true);
@@ -102,6 +103,15 @@ const Profile = () => {
     } finally {
       setUpdateLoading(false);
     }
+  };
+
+  const handleMessage = () => {
+    if (!user) {
+      return;
+    }
+
+    getMessages(user);
+    navigate("/direct");
   };
 
   const toggleFollow = async () => {
@@ -343,6 +353,12 @@ const Profile = () => {
                           <UserPlus /> Follow
                         </>
                       )}
+                    </Button>
+                  )}
+                  {!isOwnProfile && (
+                    <Button onClick={handleMessage} variant={"outline"}>
+                      <MessageCircle />
+                      Message
                     </Button>
                   )}
                 </div>

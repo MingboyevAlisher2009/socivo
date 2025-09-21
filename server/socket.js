@@ -7,24 +7,32 @@ const userSocketMap = new Map();
 
 const disconnect = (socket) => {
   console.log(`Disconnect user ${socket.id}`);
-  for (const [userId, socketId] of userSocketMap.entries()) {
-    if (socket.id === socketId) {
-      userSocketMap.delete(userId);
+
+  for (const [userId, sockets] of userSocketMap.entries()) {
+    if (sockets.has(socket.id)) {
+      sockets.delete(socket.id);
+      if (sockets.size === 0) {
+        userSocketMap.delete(userId);
+      }
       break;
     }
   }
+  socketIo.emit("getOnlineUsers", Array.from(userSocketMap.keys()));
 };
 
 export const sendNotifications = (message) => {
-  const receiver_id = userSocketMap.get(message.receiver.id);
-  console.log(receiver_id);
+  const recipientSockets = userSocketMap.get(message.receiver.id);
 
-  if (!receiver_id) {
+  if (!recipientSockets) {
     console.log(`User ${message.receiver.id} not connected`);
     return;
   }
 
-  socketIo.to(receiver_id).emit("notification", message);
+  if (recipientSockets) {
+    recipientSockets.forEach((sid) =>
+      socketIo.to(sid).emit("notification", message)
+    );
+  }
 };
 
 export const sendLike = (message) => {
@@ -43,6 +51,22 @@ export const sendComment = (message) => {
   }
 
   socketIo.emit("comment", message);
+};
+
+export const sendSocketMessage = (message) => {
+  const senderSockets = userSocketMap.get(message.sender.id);
+  const recipientSockets = userSocketMap.get(message.recipient.id);
+
+  if (senderSockets) {
+    senderSockets.forEach((sid) =>
+      socketIo.to(sid).emit("reciveMessage", message)
+    );
+  }
+  if (recipientSockets) {
+    recipientSockets.forEach((sid) =>
+      socketIo.to(sid).emit("reciveMessage", message)
+    );
+  }
 };
 
 const setupSocket = (server) => {
@@ -79,10 +103,41 @@ const setupSocket = (server) => {
   io.on("connection", (socket) => {
     const userId = socket.userId;
 
-    if (userId) {
-      userSocketMap.set(userId, socket.id);
-      console.log(`User connected: ${userId} with socket ID ${socket.id}`);
+    if (!userSocketMap.has(userId)) {
+      userSocketMap.set(userId, new Set());
     }
+    userSocketMap.get(userId)?.add(socket.id);
+    console.log(`User connected: ${userId} with socket ID ${socket.id}`);
+
+    console.log(userSocketMap.entries());
+
+    io.emit("getOnlineUsers", Array.from(userSocketMap.keys()));
+
+    socket.on("readMessages", ({ sender, recipient, messages }) => {
+      const senderSockets = userSocketMap.get(sender.id);
+      const recipientSockets = userSocketMap.get(recipient.id);
+
+      if (senderSockets) {
+        senderSockets.forEach((sid) =>
+          io.to(sid).emit("getReadMessages", messages)
+        );
+      }
+      if (recipientSockets) {
+        recipientSockets.forEach((sid) =>
+          io.to(sid).emit("getReadMessages", messages)
+        );
+      }
+    });
+
+    socket.on("typing", ({ sender, recipient, message }) => {
+      const recipientSockets = userSocketMap.get(recipient.id);
+
+      if (recipientSockets) {
+        recipientSockets.forEach((sid) =>
+          io.to(sid).emit("getTyping", { sender, message })
+        );
+      }
+    });
 
     socket.on("disconnect", () => disconnect(socket));
   });

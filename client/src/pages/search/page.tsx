@@ -5,15 +5,57 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import axiosInstance, { BASE_URL } from "@/http/axios";
+import { useAppStore } from "@/store";
 import type { IUser } from "@/types";
+import { AxiosError } from "axios";
 import { AnimatePresence, motion } from "framer-motion";
-import { SearchIcon, UserPlus } from "lucide-react";
+import { SearchIcon, UserMinus, UserPlus } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 const Search = () => {
+  const { userInfo, setUserInfo } = useAppStore();
+  const navigate = useNavigate();
   const [query, setQuery] = useState("");
   const [users, setUsers] = useState<IUser[] | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [toggleFollowLoading, setToggleFollowLoading] = useState(false);
+
+  const toggleFollow = async (id: string) => {
+    if (!userInfo) {
+      return;
+    }
+    setToggleFollowLoading(true);
+    try {
+      const { data } = await axiosInstance.post("/posts/follow", {
+        id,
+      });
+
+      if (data.data.type === "follow") {
+        setUserInfo({
+          ...userInfo,
+          following: [...userInfo.following, data.data],
+        });
+      } else {
+        const followingUsers = userInfo.following.filter(
+          (f) => f.id !== data.data.id
+        );
+        console.log(followingUsers);
+
+        setUserInfo({ ...userInfo, following: followingUsers });
+      }
+    } catch (error) {
+      const message =
+        error instanceof AxiosError
+          ? error.response?.data?.message ||
+            "Something went wrong. Please try again."
+          : "Something went wrong. Please try again.";
+      toast.error(message);
+    } finally {
+      setToggleFollowLoading(false);
+    }
+  };
 
   const getUsers = async (searchQuery: string) => {
     setIsLoading(true);
@@ -87,6 +129,7 @@ const Search = () => {
             ) : users && users.length > 0 ? (
               users.map((user, i) => (
                 <motion.div
+                  onClick={() => navigate(`/profile/${user.id}`)}
                   key={user.id || i}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -97,7 +140,7 @@ const Search = () => {
                     delay: i * 0.05,
                   }}
                 >
-                  <Card className="p-0">
+                  <Card className="p-0 cursor-pointer">
                     <CardContent className="flex w-full items-center justify-between gap-2 rounded-3xl p-4">
                       <div className="flex items-center gap-2">
                         <Avatar className="h-10 w-10">
@@ -112,11 +155,23 @@ const Search = () => {
                         </div>
                       </div>
                       <Button
+                        onClick={() => toggleFollow(user.id)}
+                        disabled={toggleFollowLoading}
                         className="rounded-full bg-transparent"
                         variant="outline"
                       >
-                        <UserPlus className="mr-1 h-4 w-4" />
-                        Follow
+                        {userInfo &&
+                        userInfo?.following.some((f) => f.id === user.id) ? (
+                          <>
+                            <UserMinus className="lg:mr-2 h-4 w-4" />
+                            <p className="hidden lg:block">Unfollow</p>
+                          </>
+                        ) : (
+                          <>
+                            <UserPlus className="lg:mr-2 h-4 w-4" />
+                            <p className="hidden lg:block">Follow</p>
+                          </>
+                        )}
                       </Button>
                     </CardContent>
                   </Card>

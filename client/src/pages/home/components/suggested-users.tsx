@@ -6,17 +6,21 @@ import { useAppStore } from "@/store";
 import type { IUser } from "@/types";
 import { AxiosError } from "axios";
 import { UserMinus, UserPlus, Users } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
 export default function SuggestedUsers() {
   const { suggestedUsers, getSuggestedUsers, setUserInfo, userInfo } =
     useAppStore();
+  const navigate = useNavigate();
+  const [toggleFollowLoading, setToggleFollowLoading] = useState(false);
 
   const toggleFollow = async (id: string) => {
     if (!userInfo) {
       return;
     }
+    setToggleFollowLoading(true);
     try {
       const { data } = await axiosInstance.post("/posts/follow", {
         id,
@@ -42,6 +46,8 @@ export default function SuggestedUsers() {
             "Something went wrong. Please try again."
           : "Something went wrong. Please try again.";
       toast.error(message);
+    } finally {
+      setToggleFollowLoading(false);
     }
   };
 
@@ -65,7 +71,11 @@ export default function SuggestedUsers() {
       <CardContent className="grid gap-4">
         {suggestedUsers ? (
           suggestedUsers.map((user) => (
-            <div key={user.id} className="flex items-center justify-between">
+            <div
+              onClick={() => navigate(`/profile/${user.id}`)}
+              key={user.id}
+              className="flex items-center justify-between cursor-pointer"
+            >
               <div className="flex items-center gap-3">
                 <Avatar className="h-10 w-10">
                   <AvatarImage
@@ -87,6 +97,7 @@ export default function SuggestedUsers() {
               </div>
               <Button
                 onClick={() => toggleFollow(user.id)}
+                disabled={toggleFollowLoading}
                 variant="outline"
                 size="sm"
               >

@@ -6,6 +6,7 @@ import type { StateCreator } from "zustand";
 
 export interface AuthSlice {
     userInfo: IUser | null;
+    onlineUsers: string[] | null
     suggestedUsers: IUser[] | null
     loading: boolean;
     suggestedLoading: boolean;
@@ -16,6 +17,7 @@ export interface AuthSlice {
     getUserInfo: (identify?: string) => Promise<IUser | null>;
     getSuggestedUsers: () => Promise<IUser[] | null>
     setUserInfo: (userInfo: IUser) => void;
+    setOnlineUsers: (onlineUsers: string[]) => void
     setLoading: (loading: boolean) => void;
     setLoginLoading: (loading: boolean) => void;
     setSignUpLoading: (loading: boolean) => void;
@@ -28,6 +30,7 @@ export interface AuthSlice {
 
 const authSlice: StateCreator<AuthSlice> = (set, get) => ({
     userInfo: null,
+    onlineUsers: null,
     suggestedUsers: null,
     loading: false,
     suggestedLoading: false,
@@ -38,6 +41,7 @@ const authSlice: StateCreator<AuthSlice> = (set, get) => ({
 
     setLoading: (loading) => set({ loading }),
     setUserInfo: (userInfo) => set({ userInfo }),
+    setOnlineUsers: (onlineUsers) => set({ onlineUsers }),
     setLoginLoading: (loading) => set({ loginLoading: loading }),
     setSignUpLoading: (loading) => set({ signUpLoading: loading }),
     setVerificationLoading: (loading) => set({ verificationLoading: loading }),

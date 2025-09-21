@@ -72,3 +72,28 @@ export interface Notifications {
     is_seen: boolean
     created_at: string
 }
+
+export interface ChatUser {
+    id: string;
+    username: string;
+    email: string;
+    first_name?: string
+    last_name?: string;
+    avatar?: string;
+}
+
+export interface Message {
+    id: string
+    sender: ChatUser,
+    recipient: ChatUser
+    reply?: Message,
+    message: string,
+    image?: string,
+    read: boolean,
+    created_at: string
+    last_message_time: string
+}
+
+export interface Contacts extends ChatUser {
+    lastMessage?: Message;
+}

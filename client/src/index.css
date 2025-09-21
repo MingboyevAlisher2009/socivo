@@ -125,7 +125,7 @@
 
 /* Track */
 ::-webkit-scrollbar-track {
-  @apply bg-background;
+  @apply bg-transparent;
 }
 
 /* Handle */
