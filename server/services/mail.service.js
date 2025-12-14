@@ -2,21 +2,24 @@ import nodemailer from "nodemailer";
 import bcrypt from "bcrypt";
 import pool from "../db/db.js";
 import BaseError from "../error/base.error.js";
+import { Resend } from "resend";
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 class MailService {
   constructor() {
-    this.transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
-      port: process.env.SMTP_PORT,
-      secure: false,
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-      },
-      tls: {
-        rejectUnauthorized: false,
-      },
-    });
+    // this.transporter = nodemailer.createTransport({
+    //   host: process.env.SMTP_HOST,
+    //   port: process.env.SMTP_PORT,
+    //   secure: false,
+    //   auth: {
+    //     user: process.env.SMTP_USER,
+    //     pass: process.env.SMTP_PASS,
+    //   },
+    //   tls: {
+    //     rejectUnauthorized: false,
+    //   },
+    // });
   }
 
   async sendOtp(to) {
@@ -38,9 +41,9 @@ class MailService {
       [to, hashedOtp, new Date(Date.now() + 5 * 60 * 1000), new Date()]
     );
 
-    await this.transporter.sendMail({
-      from: process.env.SMTP_USER,
-      to,
+    await resend.emails.send({
+      from: "Socivo <onboarding@resend.dev>",
+      to: [to],
       subject: `Your OTP for Verification`,
       html: `
         <div style="font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px;">
