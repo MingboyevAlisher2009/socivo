@@ -58,6 +58,7 @@ const authSlice: StateCreator<AuthSlice> = (set, get) => ({
             const isVerified = data.data.is_verified;
 
             if (!isVerified) {
+                sessionStorage.setItem("email", email);
                 toast.info(`Please verify your email to continue. OTP has been sent to ${data.data.email}`);
                 window.location.replace("/auth/verification");
                 return;
