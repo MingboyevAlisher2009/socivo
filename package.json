@@ -5,13 +5,15 @@
   "main": "app.js",
   "scripts": {
     "dev": "nodemon server/app.js",
-    "start": "node server/app.js"
+    "start": "node server/app.js",
+    "build": "npm install && npm install --prefix client && npm run build --prefix client"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "module",
   "dependencies": {
+    "@neondatabase/serverless": "^1.0.2",
     "bcrypt": "^6.0.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",

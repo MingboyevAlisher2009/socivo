@@ -15,7 +15,6 @@ import {
   VideoOff,
   Monitor,
   Users,
-  Clock,
 } from "lucide-react";
 import {
   Dialog,
@@ -39,17 +38,17 @@ const Room = () => {
   const [isVideoOff, setIsVideoOff] = useState(false);
   const [isUserMuted, setIsUserMuted] = useState(false);
   const [isUserVideoOff, setisUserVideoOff] = useState(false);
-  const [callDuration, setCallDuration] = useState(0);
+  // const [callDuration, setCallDuration] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
 
-  const formatDuration = (seconds: number) => {
-    const hrs = Math.floor(seconds / 3600);
-    const mins = Math.floor((seconds % 3600) / 60);
-    const secs = seconds % 60;
-    return `${hrs.toString().padStart(2, "0")}:${mins
-      .toString()
-      .padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
-  };
+  // const formatDuration = (seconds: number) => {
+  //   const hrs = Math.floor(seconds / 3600);
+  //   const mins = Math.floor((seconds % 3600) / 60);
+  //   const secs = seconds % 60;
+  //   return `${hrs.toString().padStart(2, "0")}:${mins
+  //     .toString()
+  //     .padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+  // };
 
   useEffect(() => {
     if (!userInfo?.id) return;
@@ -212,12 +211,12 @@ const Room = () => {
       <div className="sticky top-0 left-0 right-0 z-30">
         <div className="flex items-center justify-between px-4 md:px-6 py-3 md:py-4 max-w-7xl mx-aut">
           <div className="flex items-center gap-3 md:gap-6">
-            <div className="flex items-center gap-2 text-emerald-50/90">
+            {/* <div className="flex items-center gap-2 text-emerald-50/90">
               <Clock className="w-3.5 h-3.5 md:w-4 md:h-4 text-emerald-400" />
               <span className="text-xs md:text-sm font-medium tabular-nums">
                 {formatDuration(callDuration)}
               </span>
-            </div>
+            </div> */}
             <div className="flex items-center gap-2 text-emerald-50/90">
               <Users className="w-3.5 h-3.5 md:w-4 md:h-4 text-emerald-400" />
               <span className="text-xs md:text-sm font-medium">

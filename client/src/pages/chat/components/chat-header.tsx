@@ -1,18 +1,19 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { useSocket } from "@/context/socket-context";
-import axiosInstance, { BASE_URL } from "@/http/axios";
+// import { useSocket } from "@/context/socket-context";
+import { BASE_URL } from "@/http/axios";
 import { useAppStore } from "@/store";
-import { AxiosError } from "axios";
-import { Phone, Video, X } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import { toast } from "sonner";
+import { X } from "lucide-react";
+// import { AxiosError } from "axios";
+// import { Phone, Video, X } from "lucide-react";
+// import { useNavigate } from "react-router-dom";
+// import { toast } from "sonner";
 
 const ChatHeader = () => {
-  const { userInfo, selectedChat, closeContact, onlineUsers, typing } =
+  const { selectedChat, closeContact, onlineUsers, typing } =
     useAppStore();
-  const navigate = useNavigate();
-  const socket: any = useSocket();
+  // const navigate = useNavigate();
+  // const socket: any = useSocket();
 
   const displayName =
     selectedChat?.first_name && selectedChat?.last_name
@@ -23,29 +24,29 @@ const ChatHeader = () => {
     (onlineuser) => onlineuser === selectedChat?.id
   );
 
-  const handleCall = async (type: "video_call" | "call") => {
-    try {
-      const { data } = await axiosInstance.post("/messages/send-message", {
-        recipient: selectedChat,
-        type,
-      });
-      navigate(`/room/${data.data.id}`);
-      socket.emit("create-room", {
-        roomId: data.data.id || "",
-        sender: userInfo,
-        recipient: selectedChat,
-        type,
-      });
-    } catch (error) {
-      const message =
-        error instanceof AxiosError
-          ? error.response?.data?.message ||
-            "Something went wrong. Please try again."
-          : "Something went wrong. Please try again.";
+  // const handleCall = async (type: "video_call" | "call") => {
+  //   try {
+  //     const { data } = await axiosInstance.post("/messages/send-message", {
+  //       recipient: selectedChat,
+  //       type,
+  //     });
+  //     navigate(`/room/${data.data.id}`);
+  //     socket.emit("create-room", {
+  //       roomId: data.data.id || "",
+  //       sender: userInfo,
+  //       recipient: selectedChat,
+  //       type,
+  //     });
+  //   } catch (error) {
+  //     const message =
+  //       error instanceof AxiosError
+  //         ? error.response?.data?.message ||
+  //           "Something went wrong. Please try again."
+  //         : "Something went wrong. Please try again.";
 
-      toast.error(message);
-    }
-  };
+  //     toast.error(message);
+  //   }
+  // };
 
   return (
     <div className="flex items-center justify-between h-20 px-4 w-full border-b backdrop-blur-md bg-[#101012]">

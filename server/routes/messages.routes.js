@@ -12,7 +12,6 @@ import multer from "multer";
 const router = new Router();
 const upload = multer({ dest: "uploads/images" });
 
-router.get("/:recipientId", AuthMiddleware, getMessages);
 router.post("/send-message", AuthMiddleware, sendMessage);
 router.post("/message-read", AuthMiddleware, messageRed);
 router.post(
@@ -23,5 +22,6 @@ router.post(
 );
 
 router.delete("/delete-image/:image", AuthMiddleware, deleteImage);
+router.get("/:recipientId", AuthMiddleware, getMessages);
 
 export default router;
