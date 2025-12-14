@@ -46,7 +46,7 @@ app.use("/api/notifications", notificationsRoutes);
 
 const PORT = process.env.PORT || 4000;
 
-app.use(express.static(path.join(__dirname, "/client/dist")));
+app.use(express.static(path.join(__dirname, "dist")));
 
 const server = app.listen(PORT, async () => {
   await createDatabases();
