@@ -211,13 +211,6 @@ export const createPost = async (req, res, next) => {
   const file = req.file;
 
   try {
-    await pool.query(`CREATE TABLE IF NOT EXISTS posts (
-        id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-        user_id UUID REFERENCES person(id) ON DELETE CASCADE,
-        content TEXT NOT NULL,
-        image TEXT NOT NULL,
-        created_at TIMESTAMP DEFAULT now()
-        );`);
     if (!content) {
       return BaseError.BadRequest(
         "Content is required. Please enter your preferences."
@@ -255,24 +248,6 @@ export const toggleFollow = async (req, res, next) => {
     if (!id) {
       return errorResponse(res, 400, "Following id reqiured");
     }
-
-    await pool.query(`CREATE TABLE IF NOT EXISTS follow (
-      id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-      follower_id UUID REFERENCES users(id) ON DELETE CASCADE,
-      following_id UUID REFERENCES users(id) ON DELETE CASCADE,
-      UNIQUE(follower_id, following_id)
-   );`);
-
-    await pool.query(`CREATE TABLE IF NOT EXISTS notifications (
-          id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-          sender_id UUID REFERENCES users(id) ON DELETE CASCADE,
-          receiver_id UUID REFERENCES users(id) ON DELETE CASCADE,
-          post_id UUID REFERENCES posts(id) ON DELETE CASCADE,
-          comment_id UUID REFERENCES comments(id) ON DELETE CASCADE,
-          type VARCHAR(10) CHECK(notifications.type = 'like' OR notifications.type = 'comment' OR notifications.type = 'follow'),
-          created_at TIMESTAMP DEFAULT now(),
-          is_seen BOOLEAN DEFAULT false
-        );`);
 
     const { rows } = await pool.query(
       `SELECT * FROM follow WHERE follower_id = $1 AND following_id = $2;`,
@@ -349,26 +324,6 @@ export const like = async (req, res, next) => {
   const { userId } = req;
   const { post_id } = req.body;
   try {
-    await pool.query(`CREATE TABLE IF NOT EXISTS likes (
-      id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-      user_id UUID REFERENCES users(id) ON DELETE CASCADE,
-      post_id UUID REFERENCES posts(id) ON DELETE CASCADE,
-      created_at TIMESTAMP DEFAULT now(),
-      UNIQUE (user_id, post_id)
-      );
-    `);
-
-    await pool.query(`CREATE TABLE IF NOT EXISTS notifications (
-          id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-          sender_id UUID REFERENCES users(id) ON DELETE CASCADE,
-          receiver_id UUID REFERENCES users(id) ON DELETE CASCADE,
-          post_id UUID REFERENCES posts(id) ON DELETE CASCADE,
-          comment_id UUID REFERENCES comments(id) ON DELETE CASCADE,
-          type VARCHAR(10) CHECK(notifications.type = 'like' OR notifications.type = 'comment' OR notifications.type = 'follow'),
-          created_at TIMESTAMP DEFAULT now(),
-          is_seen BOOLEAN DEFAULT false
-        );`);
-
     const { rows: likes } = await pool.query(
       `SELECT * FROM likes WHERE post_id = $1 AND user_id = $2;`,
       [post_id, userId]
@@ -479,26 +434,6 @@ export const comment = async (req, res, next) => {
   const { userId } = req;
   const { post_id, comment } = req.body;
   try {
-    await pool.query(`CREATE TABLE IF NOT EXISTS comments (
-      id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-      user_id UUID REFERENCES users(id) ON DELETE CASCADE,
-      post_id UUID REFERENCES posts(id) ON DELETE CASCADE,
-      comment TEXT NOT NULL,
-      created_at TIMESTAMP DEFAULT now()
-      );
-    `);
-
-    await pool.query(`CREATE TABLE IF NOT EXISTS notifications (
-          id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-          sender_id UUID REFERENCES users(id) ON DELETE CASCADE,
-          receiver_id UUID REFERENCES users(id) ON DELETE CASCADE,
-          post_id UUID REFERENCES posts(id) ON DELETE CASCADE,
-          comment_id UUID REFERENCES comments(id) ON DELETE CASCADE,
-          type VARCHAR(10) CHECK(notifications.type = 'like' OR notifications.type = 'comment' OR notifications.type = 'follow'),
-          created_at TIMESTAMP DEFAULT now(),
-          is_seen BOOLEAN DEFAULT false
-        );`);
-
     const { rows } = await pool.query(
       `WITH inserted AS (
         INSERT INTO comments (user_id, post_id, comment)

@@ -53,7 +53,7 @@ export const getContacts = async (req, res, next) => {
 
     for (const contact of allContacts) {
       const { rows: lastMessage } = await pool.query(
-        `SELECT m.id, m.reply, m.message, m.image, m.read, m.created_at, 
+        `SELECT m.id, m.reply, m.message, m.image, m.read, m.type, m.created_at, 
           json_build_object(
               'id', sender.id,
               'username', sender.username,

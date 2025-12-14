@@ -35,7 +35,7 @@ const MessageBar = () => {
 
   const handleSend = async () => {
     if (!message.trim() && !image) return;
-    await sendMessage(message);
+    await sendMessage(message.trim());
     setMessage("");
   };
 
@@ -81,7 +81,7 @@ const MessageBar = () => {
   };
 
   return (
-    <div className="w-full border-t p-3 space-y-3 bg-[#101012] sticky bottom-0">
+    <div className="w-full mx-auto border-t p-3 space-y-3 bg-[#101012] sticky bottom-3">
       <div className="px-10">
         {uploadImageLoading && (
           <div className="flex justify-center items-center rounded-md bg-accent w-20 h-20">
@@ -127,6 +127,9 @@ const MessageBar = () => {
                 />
               )}
               <p className="text-sm text-muted-foreground line-clamp-3 break-all">
+                {reply.type === "call"
+                  ? "Incoming voice call..."
+                  : reply.type === "video_call" && "Incoming video call..."}
                 {reply.message}
               </p>
             </div>
@@ -136,6 +139,7 @@ const MessageBar = () => {
           </div>
         )}
       </div>
+
       <div className="flex items-end gap-2">
         <Button
           disabled={uploadImageLoading || deleteImageLoading || !!image}
@@ -168,8 +172,7 @@ const MessageBar = () => {
             }
           }}
           placeholder="Type a message..."
-          rows={4}
-          className="flex-1 rounded-2xl resize-none overflow-hidden max-h-20 px-4 py-2"
+          className="flex-1 rounded-2xl resize-none min-h-10 max-h-32 px-4 py-2"
         />
 
         <Button

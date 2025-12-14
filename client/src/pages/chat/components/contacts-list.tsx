@@ -99,6 +99,10 @@ const ContactsList = () => {
                       {displayName}
                     </h3>
                     <p className="text-sm text-muted-foreground mt-1 line-clamp-1">
+                      {contact.lastMessage?.type === "call"
+                        ? "Incoming call"
+                        : contact.lastMessage?.type === "video_call" &&
+                          "Incoming video call"}
                       {contact.lastMessage
                         ? contact.lastMessage?.image
                           ? "Image"

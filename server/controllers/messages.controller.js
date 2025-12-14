@@ -26,19 +26,8 @@ export const getMessages = async (req, res, next) => {
       return errorResponse(res, 400, "Recipient id is required.");
     }
 
-    await pool.query(`CREATE TABLE IF NOT EXISTS messages (
-       id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-       sender UUID REFERENCES users(id) ON DELETE CASCADE,
-       recipient UUID REFERENCES users(id) ON DELETE CASCADE,
-       reply UUID REFERENCES messages(id) ON DELETE CASCADE,
-       message TEXT,
-       image TEXT,
-       read BOOLEAN DEFAULT false,
-       created_at TIMESTAMP DEFAULT now()
-    )`);
-
     const { rows } = await pool.query(
-      `SELECT m.id, m.message, m.image, m.read, m.created_at, 
+      `SELECT m.id, m.message, m.image, m.read, m.type, m.created_at, 
        json_build_object(
           'id', sender.id,
           'username', sender.username,
@@ -62,6 +51,7 @@ export const getMessages = async (req, res, next) => {
           'id', r.id,
           'message', r.message,
           'image', r.image,
+          'type', r.type,
           'created_at', r.created_at,
           'sender', json_build_object(
               'id', rs.id,
@@ -103,32 +93,21 @@ export const getMessages = async (req, res, next) => {
 
 export const sendMessage = async (req, res, next) => {
   const { userId } = req;
-  const { recipient, reply, message, image } = req.body;
+  const { recipient, reply, message, image, type = null } = req.body;
 
   try {
     if (!recipient) {
       return errorResponse(res, 400, "Recipient id is required.");
     }
 
-    await pool.query(`CREATE TABLE IF NOT EXISTS messages (
-       id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-       sender UUID REFERENCES users(id) ON DELETE CASCADE,
-       recipient UUID REFERENCES users(id) ON DELETE CASCADE,
-       reply UUID REFERENCES messages(id) ON DELETE CASCADE,
-       message TEXT,
-       image TEXT,
-       read BOOLEAN DEFAULT false,
-       created_at TIMESTAMP DEFAULT now()
-    )`);
-
     const { rows } = await pool.query(
       `WITH inserted AS (
-            INSERT INTO messages (sender, recipient, reply, message, image)
-            VALUES($1, $2, $3, $4, $5)
-            RETURNING id, sender, recipient, reply, message, image, read, created_at
+            INSERT INTO messages (sender, recipient, reply, message, image, type)
+            VALUES($1, $2, $3, $4, $5, $6)
+            RETURNING id, sender, recipient, reply, message, image, read, type, created_at
         )
         
-        SELECT i.id, i.message, i.image, i.read, i.created_at,  
+        SELECT i.id, i.message, i.image, i.read, i.type, i.created_at,  
         json_build_object(
           'id', sender.id,
           'username', sender.username,
@@ -152,6 +131,7 @@ export const sendMessage = async (req, res, next) => {
           'id', r.id,
           'message', r.message,
           'image', r.image,
+          'type', r.type,
           'created_at', r.created_at,
           'sender', json_build_object(
               'id', rs.id,
@@ -180,12 +160,22 @@ export const sendMessage = async (req, res, next) => {
         LEFT JOIN users rs ON rs.id = r.sender
         LEFT JOIN users rr ON rr.id = r.recipient;
         `,
-      [userId, recipient, reply, message, image]
+      [
+        userId,
+        type ? recipient.id : recipient,
+        reply,
+        message,
+        image,
+        type,
+      ]
     );
 
     sendSocketMessage(rows[0]);
 
-    successResponse(res, 201, "Message succesully sent");
+    successResponse(res, 201, {
+      id: rows[0].id,
+      status: "Message succesully sent",
+    });
   } catch (error) {
     console.log("Creating message error:", error);
     next(error);
@@ -205,10 +195,10 @@ export const messageRed = async (req, res, next) => {
       const { rows } = await pool.query(
         `WITH inserted AS (
           UPDATE messages SET read = $2 WHERE id = $1
-          RETURNING id, sender, recipient, reply, message, image, read, created_at
+          RETURNING id, sender, recipient, reply, message, image, read, type, created_at
         )
           
-        SELECT i.id, i.message, i.image, i.read, i.created_at,  
+        SELECT i.id, i.message, i.image, i.read, i.type, i.created_at,  
         json_build_object(
           'id', sender.id,
           'username', sender.username,

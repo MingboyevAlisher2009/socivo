@@ -90,10 +90,16 @@ export interface Message {
     message: string,
     image?: string,
     read: boolean,
+    type?: "video_call" | "call"
     created_at: string
     last_message_time: string
 }
 
 export interface Contacts extends ChatUser {
     lastMessage?: Message;
+}
+
+export interface IPeer {
+    userName: string;
+    peerId: string;
 }

@@ -73,6 +73,7 @@ const chatSlice: StateCreator<ChatSlice> = (set, get) => ({
         }
         const contacts = get().contacts || []
         set({ selectedChat, messageLoading: true })
+        sessionStorage.setItem("selected-chat-data", JSON.stringify(selectedChat))
         try {
             const { data } = await axiosInstance.get(`/messages/${selectedChat.id}`)
             set({ messages: data.data })
@@ -201,6 +202,7 @@ const chatSlice: StateCreator<ChatSlice> = (set, get) => ({
 
     closeContact: () => {
         set({ selectedChat: null })
+        sessionStorage.removeItem("selected-chat-data")
     }
 })
 

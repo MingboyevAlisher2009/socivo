@@ -25,11 +25,11 @@ export const login = async (req, res, next) => {
   const { email, password } = req.body;
   try {
     if (!email) {
-      return BaseError.BadRequest("Email is required.");
+      return errorResponse(res, 400, "Email is required.");
     } else if (!validEmail.test(email)) {
-      return BaseError.BadRequest("Invalid email format.");
+      return errorResponse(res, 400, "Invalid email format.");
     } else if (!password) {
-      return BaseError.BadRequest("Password is required.");
+      return errorResponse(res, 400, "Password is required.");
     }
 
     const result = await pool.query(`SELECT * FROM users WHERE email = $1`, [
@@ -78,7 +78,7 @@ export const sendOtp = async (req, res, next) => {
     const { email } = req.body;
 
     if (!email) {
-      return BaseError.BadRequest("Email is required.");
+      return errorResponse(res, 400, "Email is required.");
     }
 
     await mailService.sendOtp(email);
@@ -94,11 +94,11 @@ export const verifyOtp = async (req, res, next) => {
   const { email, otp } = req.body;
   try {
     if (!email) {
-      return BaseError.BadRequest("Email is required.");
+      return errorResponse(res, 400, "Email is required.");
     } else if (!validEmail.test(email)) {
-      return BaseError.BadRequest("Invalid email format.");
+      return errorResponse(res, 400, "Invalid email format.");
     } else if (!otp) {
-      return BaseError.BadRequest("OTP is required.");
+      return errorResponse(res, 400, "OTP is required.");
     }
 
     await mailService.verifyOtp(email, otp);
@@ -117,22 +117,12 @@ export const signUp = async (req, res, next) => {
   console.log("Sign up request:", req.body);
 
   try {
-    await pool.query(`CREATE TABLE IF NOT EXISTS users (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    first_name VARCHAR(100),
-    last_name VARCHAR(100),
-    avatar TEXT,
-    bio TEXT,
-    username VARCHAR(100) NOT NULL UNIQUE,
-    email VARCHAR(100) NOT NULL UNIQUE,
-    password TEXT NOT NULL,
-    created_at TIMESTAMPTZ DEFAULT now(),
-    is_verified BOOLEAN DEFAULT false
-);`);
     if (!email) {
-      return BaseError.BadRequest("Email is required.");
+      return errorResponse(res, 400, "Email is required.");
+    } else if (!username) {
+      return errorResponse(res, 400, "Username is required.");
     } else if (!validEmail.test(email)) {
-      return BaseError.BadRequest("Invalid email format.");
+      return errorResponse(res, 400, "Invalid email format.");
     }
     const result = await pool.query(`SELECT * FROM users WHERE email = $1`, [
       email,
@@ -140,7 +130,7 @@ export const signUp = async (req, res, next) => {
     const existingUser = result.rows[0];
 
     if (existingUser) {
-      return errorResponse(res, 409, "User with this email already exists.");
+      return errorResponse(res, 400, "User with this email already exists.");
     }
 
     const hashPassword = await hash(password, 10);
@@ -355,7 +345,7 @@ export const updateAvatar = async (req, res, next) => {
     const user = users[0];
 
     if (!file) {
-      return BaseError.BadRequest("Avatar file is required.");
+      return errorResponse(res, 400, "Avatar file is required.");
     }
 
     const date = Date.now();
@@ -369,7 +359,7 @@ export const updateAvatar = async (req, res, next) => {
     }
 
     if (!existsSync(fileName)) {
-      return BaseError.BadRequest("File upload failed.");
+      return errorResponse(res, 400, "File upload failed.");
     }
 
     const { rows } = await pool.query(

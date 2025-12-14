@@ -8,7 +8,7 @@ class MailService {
     this.transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST,
       port: process.env.SMTP_PORT,
-      secure: false,
+      secure: true,
       auth: {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASS,
@@ -81,10 +81,9 @@ class MailService {
         throw BaseError.BadRequest("Invalid OTP entered");
       }
 
-      const result = await pool.query(
-        `UPDATE users SET is_verified = true WHERE email = $1`,
-        [email]
-      );
+      await pool.query(`UPDATE users SET is_verified = true WHERE email = $1`, [
+        email,
+      ]);
       await pool.query(`DELETE FROM otp WHERE email = $1`, [email]);
 
       return true;

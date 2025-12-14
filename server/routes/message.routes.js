@@ -10,7 +10,7 @@ import AuthMiddleware from "../middleware/auth.middleware.js";
 import multer from "multer";
 
 const router = new Router();
-const upload = multer({ dest: "/uploads/images" });
+const upload = multer({ dest: "uploads/images" });
 
 router.get("/:recipientId", AuthMiddleware, getMessages);
 router.post("/send-message", AuthMiddleware, sendMessage);

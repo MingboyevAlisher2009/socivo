@@ -11,6 +11,7 @@ import {
   Edit2,
   Loader2,
   MessageCircle,
+  Plus,
   Trash2,
   UserMinus,
   UserPlus,
@@ -39,6 +40,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { AxiosError } from "axios";
 import SeoHead from "@/components/hamlet";
+import CreatePostModal from "@/components/create-post-modal";
 
 const Profile = () => {
   const { userInfo, getUserInfo, getMessages } = useAppStore();
@@ -50,6 +52,7 @@ const Profile = () => {
   const [updateLoading, setUpdateLoading] = useState(false);
   const [updateModal, setUpdateModal] = useState(false);
   const [followLoading, setFollowLoading] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
 
   const form = useForm<z.infer<typeof userSchema>>({
@@ -256,6 +259,8 @@ const Profile = () => {
         description={user?.bio}
       />
 
+      <CreatePostModal isOpen={isOpen} onOpenChange={setIsOpen} />
+
       <motion.div
         className="max-w-4xl mx-auto px-4 py-8"
         variants={containerVariants}
@@ -442,17 +447,22 @@ const Profile = () => {
 
         <motion.div className="space-y-6" variants={itemVariants}>
           <div className="border-t pt-8">
-            <motion.h2
-              className="text-xl font-semibold mb-6 flex items-center gap-2"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 0.8 }}
-            >
-              Posts
-              <span className="text-sm font-normal text-gray-500">
-                ({stats.posts})
-              </span>
-            </motion.h2>
+            <div className="flex items-center justify-between">
+              <motion.h2
+                className="text-xl font-semibold mb-6 flex items-center gap-2"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6, delay: 0.8 }}
+              >
+                Posts
+                <span className="text-sm font-normal text-gray-500">
+                  ({stats.posts})
+                </span>
+              </motion.h2>
+              <Button onClick={() => setIsOpen(true)} variant={"ghost"}>
+                <Plus />
+              </Button>
+            </div>
 
             {user?.posts && (
               <motion.div

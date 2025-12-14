@@ -1,3 +1,4 @@
+import express from "express";
 import cookieParser from "cookie-parser";
 import { Server } from "socket.io";
 import { verifyToken } from "./services/token.service.js";
@@ -109,8 +110,6 @@ const setupSocket = (server) => {
     userSocketMap.get(userId)?.add(socket.id);
     console.log(`User connected: ${userId} with socket ID ${socket.id}`);
 
-    console.log(userSocketMap.entries());
-
     io.emit("getOnlineUsers", Array.from(userSocketMap.keys()));
 
     socket.on("readMessages", ({ sender, recipient, messages }) => {
@@ -137,6 +136,42 @@ const setupSocket = (server) => {
           io.to(sid).emit("getTyping", { sender, message })
         );
       }
+    });
+
+    socket.on("create-room", ({ roomId, sender, recipient, type }) => {
+      const recipientSockets = userSocketMap.get(recipient.id);
+      if (recipientSockets) {
+        recipientSockets.forEach((sid) =>
+          io.to(sid).emit("incomming-call", { sender, roomId, type })
+        );
+      }
+      console.log("room created");
+    });
+
+    socket.on("join-room", ({ roomId, peerId }) => {
+      console.log("user joined the room", roomId, peerId);
+      socket.join(roomId);
+      socket.to(roomId).emit("user-joined", { peerId });
+    });
+
+    socket.on("mute", ({ peerId, roomId }) => {
+      socket.to(roomId).emit("muted-user", { peerId });
+    });
+
+    socket.on("unmute", ({ peerId, roomId }) => {
+      socket.to(roomId).emit("unmuted-user", { peerId });
+    });
+
+    socket.on("video-off", ({ peerId, roomId }) => {
+      socket.to(roomId).emit("video-tuned-off", { peerId });
+    });
+
+    socket.on("video-on", ({ peerId, roomId }) => {
+      socket.to(roomId).emit("video-tuned-on", { peerId });
+    });
+
+    socket.on("end-call", ({ roomId }) => {
+      socket.to(roomId).emit("call-ended", { message: "Call ended" });
     });
 
     socket.on("disconnect", () => disconnect(socket));

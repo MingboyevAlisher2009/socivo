@@ -1,4 +1,3 @@
-import BaseError from "../error/base.error.js";
 import { verifyToken } from "../services/token.service.js";
 
 const AuthMiddleware = (req, res, next) => {

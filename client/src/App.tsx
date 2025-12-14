@@ -12,6 +12,7 @@ import Notifications from "./pages/notifications/page";
 import Post from "./pages/post/page";
 import NotFoundPage from "./pages/page-not-found/page";
 import Chat from "./pages/chat/page";
+import Room from "./pages/room/page";
 
 const LoadingScreen = () => (
   <div className="fixed inset-0 z-50 w-full h-screen flex items-center justify-center bg-background backdrop-blur-sm">
@@ -112,6 +113,15 @@ const App = () => {
           element={
             <PrivateRoute>
               <Chat />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/room/:id"
+          element={
+            <PrivateRoute>
+              <Room />
             </PrivateRoute>
           }
         />

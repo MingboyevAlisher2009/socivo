@@ -4,13 +4,15 @@ import { useAppStore } from "@/store";
 import { format } from "date-fns";
 import MessageSkeleton from "./message-skeleton";
 import Image from "@/components/image";
-import { useEffect, useRef } from "react";
-import { CornerUpLeft } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { CornerUpLeft, Phone, Video } from "lucide-react";
 import { useSocket } from "@/context/socket-context";
 import type { Message } from "@/types";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 const MessageContainer = () => {
   const socket: any = useSocket();
+  const [selectedImage, setSelectedImage] = useState("");
   const { userInfo, messages, messageLoading, selectedChat, setReply, typing } =
     useAppStore();
   const messageEndRef = useRef<HTMLDivElement | null>(null);
@@ -67,7 +69,7 @@ const MessageContainer = () => {
     if (messageEndRef.current) {
       messageEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
-  }, [messages, typing]);
+  }, [messages]);
 
   return (
     <div className="flex-1 p-4 max-h-[45rem] space-y-10">
@@ -107,6 +109,47 @@ const MessageContainer = () => {
                             : `bg-primary text-white`
                         }`}
                       >
+                        {message.reply.type === "video_call" ? (
+                          <div className="flex justify-between items-center gap-3 p-2">
+                            <div>
+                              <h3 className="text-md font-medium text-zinc-900 dark:text-zinc-100">
+                                Video Call
+                              </h3>
+                              <p className="text-sm">Incoming video call</p>
+                            </div>
+
+                            <div
+                              className={`p-2 rounded-full ${
+                                message.reply.sender.id !== userInfo?.id
+                                  ? "bg-primary/10 text-primary"
+                                  : "bg-white/10 text-white"
+                              } flex items-center justify-center`}
+                            >
+                              <Video className="w-5 h-5" />
+                            </div>
+                          </div>
+                        ) : (
+                          message.reply.type === "call" && (
+                            <div className="flex justify-between items-center gap-3 p-2">
+                              <div>
+                                <h3 className="text-md font-medium text-zinc-900 dark:text-zinc-100">
+                                  Call
+                                </h3>
+                                <p className="text-sm">Incoming call</p>
+                              </div>
+
+                              <div
+                                className={`p-2 rounded-full ${
+                                  message.reply.sender.id !== userInfo?.id
+                                    ? "bg-primary/10 text-primary"
+                                    : "bg-white/10 text-white"
+                                } flex items-center justify-center`}
+                              >
+                                <Phone className="w-5 h-5" />
+                              </div>
+                            </div>
+                          )
+                        )}
                         {message.reply.image && (
                           <Image
                             className="rounded-2xl max-h-80 object-cover mb-2 cursor-pointer hover:opacity-90 transition"
@@ -155,11 +198,58 @@ const MessageContainer = () => {
                             }`
                       }`}
                     >
+                      {message?.type === "video_call" ? (
+                        <div className="flex justify-between items-center gap-3 p-2">
+                          <div>
+                            <h3 className="text-md font-medium text-zinc-900 dark:text-zinc-100">
+                              Video Call
+                            </h3>
+                            <p className="text-sm">Incoming video call</p>
+                          </div>
+
+                          <div
+                            className={`p-2 rounded-full ${
+                              isOtherUser
+                                ? "bg-primary/10 text-primary"
+                                : "bg-white/10 text-white"
+                            } flex items-center justify-center`}
+                          >
+                            <Video className="w-5 h-5" />
+                          </div>
+                        </div>
+                      ) : (
+                        message?.type === "call" && (
+                          <div className="flex justify-between items-center gap-3 p-2">
+                            <div>
+                              <h3 className="text-md font-medium text-zinc-900 dark:text-zinc-100">
+                                Call
+                              </h3>
+                              <p className="text-sm">Incoming call</p>
+                            </div>
+
+                            <div
+                              className={`p-2 rounded-full ${
+                                isOtherUser
+                                  ? "bg-primary/10 text-primary"
+                                  : "bg-white/10 text-white"
+                              } flex items-center justify-center`}
+                            >
+                              <Phone className="w-5 h-5" />
+                            </div>
+                          </div>
+                        )
+                      )}
                       {message.image && (
-                        <Image
-                          className="rounded-2xl max-h-80 object-cover mb-2 cursor-pointer hover:opacity-90 transition"
-                          url={`${BASE_URL}/${message.image}`}
-                        />
+                        <div
+                          onClick={() =>
+                            setSelectedImage(`${BASE_URL}/${message.image}`)
+                          }
+                        >
+                          <Image
+                            className="rounded-2xl max-h-80 object-cover mb-2 cursor-pointer hover:opacity-90 transition"
+                            url={`${BASE_URL}/${message.image}`}
+                          />
+                        </div>
                       )}
 
                       {message.message}
@@ -167,7 +257,7 @@ const MessageContainer = () => {
                       <span
                         className={`absolute w-full -bottom-5 ${
                           isOtherUser ? "left-2" : "right-2 text-end"
-                        } text-xs break-words text-muted-foreground/80`}
+                        } text-xs whitespace-nowrap text-muted-foreground/80`}
                       >
                         {format(new Date(message.created_at), "hh:mm")}
                       </span>
@@ -195,7 +285,7 @@ const MessageContainer = () => {
         : ""}
       {typing?.message.trim() && (
         <div
-          className={`flex w-full relative items-end gap-2 mb-8 ${
+          className={`flex w-full relative items-end gap-2 ${
             typing.sender.id !== userInfo?.id ? "justify-start" : "justify-end"
           }
           }`}
@@ -234,6 +324,11 @@ const MessageContainer = () => {
         </div>
       )}
       <div ref={messageEndRef} />
+      <Dialog open={!!selectedImage} onOpenChange={() => setSelectedImage("")}>
+        <DialogContent className="w-fit p-0">
+          <Image className="rounded-lg" url={selectedImage} />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

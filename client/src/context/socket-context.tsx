@@ -1,15 +1,25 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import { BASE_URL } from "@/http/axios";
 import { useAppStore } from "@/store";
-import type { Like, Comment, Notifications, Message } from "@/types";
-import { Bell, Heart, MessageCircle, UserPlus } from "lucide-react";
+import type {
+  Like,
+  Comment,
+  Notifications,
+  Message,
+  IUser,
+  ChatUser,
+} from "@/types";
+import { Bell, Heart, MessageCircle, Phone, UserPlus, X } from "lucide-react";
 import {
   createContext,
   useContext,
   useEffect,
   useRef,
+  useState,
   type ReactNode,
 } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { io } from "socket.io-client";
 import { toast } from "sonner";
 
@@ -55,6 +65,7 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
   const {
     userInfo,
     selectedChat,
+    setSelectedChat,
     setOnlineUsers,
     addNotification,
     addLike,
@@ -65,6 +76,8 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
   } = useAppStore();
   const notifSound = new Audio("/audio/notification.mp3");
   const selectedChatRef = useRef(selectedChat);
+  const { pathname } = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     selectedChatRef.current = selectedChat;
@@ -75,6 +88,16 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
       socket.current = io(BASE_URL, {
         withCredentials: true,
       });
+
+      const handleAnswer = (
+        sender: ChatUser,
+        roomId: string,
+        toastId: number | string
+      ) => {
+        toast.dismiss(toastId);
+        setSelectedChat(sender);
+        navigate(`/room/${roomId}`);
+      };
 
       socket.current.on("connect", () => {
         console.log("Connect to server");
@@ -130,9 +153,14 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
           notifSound.play();
 
           if (
+            pathname.startsWith("/chat") ||
             selectedChatRef.current?.id === message.sender.id ||
             selectedChatRef.current?.id === message.recipient.id
           ) {
+            return;
+          }
+
+          if (message.type) {
             return;
           }
 
@@ -173,6 +201,66 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
           setTyping(message);
         }
       });
+
+      socket.current.on(
+        "incomming-call",
+        ({
+          sender,
+          type,
+          roomId,
+        }: {
+          sender: IUser;
+          type: "video_call" | "call";
+          roomId: string;
+        }) => {
+          const senderName =
+            sender.first_name && sender.last_name
+              ? `${sender.first_name} ${sender.last_name}`
+              : sender.username;
+          sessionStorage.setItem("selected-chat-data", JSON.stringify(sender));
+
+          const toastId = toast(
+            <div className="flex items-center gap-4">
+              <Avatar className="h-12 w-12 flex-shrink-0 ring-2 ring-primary/50">
+                <AvatarImage src={sender.avatar || undefined} />
+                <AvatarFallback className="bg-primary/10 text-primary font-semibold">
+                  {sender.first_name?.[0] || sender.username[0].toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+
+              <div className="flex flex-col flex-1">
+                <p className="font-medium text-base">{senderName}</p>
+                <span className="text-sm text-muted-foreground">
+                  {type === "call"
+                    ? "Incoming voice call…"
+                    : "Incoming video call…"}
+                </span>
+              </div>
+
+              <div className="flex gap-2">
+                <Button
+                  variant={"ghost"}
+                  onClick={() => handleAnswer(sender, roomId, toastId)}
+                  className="p-2 rounded-full bg-green-500 hover:!bg-green-600 text-white"
+                >
+                  <Phone />
+                </Button>
+                <Button
+                  variant={"ghost"}
+                  onClick={() => {
+                    toast.dismiss(toastId);
+                    console.log("Declined call");
+                  }}
+                  className="p-2 rounded-full bg-red-500 hover:!bg-red-600 text-white"
+                >
+                  <X />
+                </Button>
+              </div>
+            </div>,
+            { duration: Infinity }
+          );
+        }
+      );
 
       socket.current.on("getReadMessages", getReadMessages);
     }

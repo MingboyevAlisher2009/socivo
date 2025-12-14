@@ -14,5 +14,5 @@ export const useAppStore = create<AppStore>()((...args) => ({
     ...authSlice(...args),
     ...postsSlice(...args),
     ...notificationsSlice(...args),
-    ...chatSlice(...args)
+    ...chatSlice(...args),
 }));
