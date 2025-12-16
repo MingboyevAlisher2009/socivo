@@ -1,11 +1,11 @@
-import { Navigate, Route, Routes, useLocation } from "react-router-dom";
+import { Route, Routes, useLocation } from "react-router-dom";
 import { useEffect } from "react";
 import { useAppStore } from "./store";
 import Home from "./pages/home/page";
 import Login from "./pages/auth/login";
 import SignUp from "./pages/auth/sign-up";
-import Verification from "./pages/auth/verification";
-import { Leaf } from "lucide-react";
+// import Verification from "./pages/auth/verification";
+// import { Leaf } from "lucide-react";
 import Search from "./pages/search/page";
 import Profile from "./pages/profile/page";
 import Notifications from "./pages/notifications/page";
@@ -14,18 +14,18 @@ import NotFoundPage from "./pages/page-not-found/page";
 import Chat from "./pages/chat/page";
 import Room from "./pages/room/page";
 
-const LoadingScreen = () => (
-  <div className="fixed inset-0 z-50 w-full h-screen flex items-center justify-center bg-background backdrop-blur-sm">
-    <div className="flex flex-col items-center gap-4 p-6 rounded-2xl shadow-xl bg-white/80 dark:bg-zinc-900/80">
-      <div className="flex flex-col items-center justify-center gap-2">
-        <Leaf className="h-10 w-10 text-primary animate-pulse" />
-      </div>
-      <p className="text-base font-medium text-muted-foreground animate-pulse">
-        Initializing secure session...
-      </p>
-    </div>
-  </div>
-);
+// const LoadingScreen = () => (
+//   <div className="fixed inset-0 z-50 w-full h-screen flex items-center justify-center bg-background backdrop-blur-sm">
+//     <div className="flex flex-col items-center gap-4 p-6 rounded-2xl shadow-xl bg-white/80 dark:bg-zinc-900/80">
+//       <div className="flex flex-col items-center justify-center gap-2">
+//         <Leaf className="h-10 w-10 text-primary animate-pulse" />
+//       </div>
+//       <p className="text-base font-medium text-muted-foreground animate-pulse">
+//         Initializing secure session...
+//       </p>
+//     </div>
+//   </div>
+// );
 
 // const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
 //   const { userInfo, loading } = useAppStore();
@@ -38,17 +38,17 @@ const LoadingScreen = () => (
 //   return <>{children}</>;
 // };
 
-const PublicRoute = ({ children }: { children: React.ReactNode }) => {
-  const { userInfo, loading } = useAppStore();
-  const lastroute = sessionStorage.getItem("lastRoute");
+// const PublicRoute = ({ children }: { children: React.ReactNode }) => {
+//   const { userInfo, loading } = useAppStore();
+//   const lastroute = sessionStorage.getItem("lastRoute");
 
-  if (loading) return <LoadingScreen />;
-  return userInfo ? (
-    <Navigate to={lastroute || "/"} replace />
-  ) : (
-    <>{children}</>
-  );
-};
+//   if (loading) return <LoadingScreen />;
+//   return userInfo ? (
+//     <Navigate to={lastroute || "/"} replace />
+//   ) : (
+//     <>{children}</>
+//   );
+// };
 
 const App = () => {
   const { getUserInfo, getNotifications, userInfo } = useAppStore();

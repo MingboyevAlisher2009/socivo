@@ -1,41 +1,41 @@
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { motion } from "framer-motion";
-import { useForm } from "react-hook-form";
-import type z from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { loginSchema } from "../../schema/form-schemas";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Eye, EyeOff, Leaf, Loader2 } from "lucide-react";
-import { Link } from "react-router-dom";
-import { useState } from "react";
-import { useAppStore } from "@/store";
+// import { Card, CardContent, CardHeader } from "@/components/ui/card";
+// import { motion } from "framer-motion";
+// import { useForm } from "react-hook-form";
+// import type z from "zod";
+// import { zodResolver } from "@hookform/resolvers/zod";
+// import { loginSchema } from "../../schema/form-schemas";
+// import {
+//   Form,
+//   FormControl,
+//   FormField,
+//   FormItem,
+//   FormLabel,
+//   FormMessage,
+// } from "@/components/ui/form";
+// import { Input } from "@/components/ui/input";
+// import { Button } from "@/components/ui/button";
+// import { Eye, EyeOff, Leaf, Loader2 } from "lucide-react";
+// import { Link } from "react-router-dom";
+// import { useState } from "react";
+// import { useAppStore } from "@/store";
 import SeoHead from "@/components/hamlet";
 import { SignIn } from "@clerk/clerk-react";
 
 const Login = () => {
-  const [isShowPassword, setIsShowPassword] = useState(false);
-  const { login, loginLoading } = useAppStore();
+  // const [isShowPassword, setIsShowPassword] = useState(false);
+  // const { login, loginLoading } = useAppStore();
 
-  const form = useForm<z.infer<typeof loginSchema>>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-    },
-  });
+  // const form = useForm<z.infer<typeof loginSchema>>({
+  //   resolver: zodResolver(loginSchema),
+  //   defaultValues: {
+  //     email: "",
+  //     password: "",
+  //   },
+  // });
 
-  function onSubmit(values: z.infer<typeof loginSchema>) {
-    login(values.email, values.password);
-  }
+  // function onSubmit(values: z.infer<typeof loginSchema>) {
+  //   login(values.email, values.password);
+  // }
 
   return (
     <>
@@ -45,7 +45,7 @@ const Login = () => {
       />
 
       <div className="max-h-screen w-full flex justify-center items-center p-4">
-        <SignIn signUpUrl="/auth/sign-up"/>
+        <SignIn signUpUrl="/auth/sign-up" />
         {/* <motion.section
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
