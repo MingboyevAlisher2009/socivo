@@ -1,5 +1,4 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import axiosInstance, { BASE_URL } from "@/http/axios";
 import { useAppStore } from "@/store";
 import { format } from "date-fns";
 import MessageSkeleton from "./message-skeleton";
@@ -10,6 +9,7 @@ import { useSocket } from "@/context/socket-context";
 import type { Message } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import axiosInstance from "@/http/axios";
 const MessageContainer = () => {
   const socket: any = useSocket();
   const [selectedImage, setSelectedImage] = useState("");
@@ -153,7 +153,7 @@ const MessageContainer = () => {
                         {message.reply.image && (
                           <Image
                             className="rounded-2xl max-h-80 object-cover mb-2 cursor-pointer hover:opacity-90 transition"
-                            url={`${BASE_URL}/${message.reply.image}`}
+                            url={message.reply.image}
                           />
                         )}
 
@@ -172,7 +172,7 @@ const MessageContainer = () => {
                       <Avatar className="h-8 w-8 shrink-0">
                         <AvatarImage
                           className="object-cover"
-                          src={`${BASE_URL}/${message?.sender.avatar}`}
+                          src={message?.sender.avatar}
                           alt={`@${message?.sender.username}`}
                         />
                         <AvatarFallback className="bg-primary/10 text-primary font-medium">
@@ -183,7 +183,7 @@ const MessageContainer = () => {
                               )}${message?.sender.last_name
                                 .charAt(0)
                                 .toUpperCase()}`
-                            : message?.sender?.username.charAt(0).toUpperCase()}
+                            : message?.sender?.username && message?.sender?.username.charAt(0).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
                     )}
@@ -242,12 +242,12 @@ const MessageContainer = () => {
                       {message.image && (
                         <div
                           onClick={() =>
-                            setSelectedImage(`${BASE_URL}/${message.image}`)
+                            setSelectedImage(message.image as string)
                           }
                         >
                           <Image
                             className="rounded-2xl max-h-80 object-cover mb-2 cursor-pointer hover:opacity-90 transition"
-                            url={`${BASE_URL}/${message.image}`}
+                            url={message.image}
                           />
                         </div>
                       )}
@@ -293,14 +293,16 @@ const MessageContainer = () => {
           <Avatar className="h-8 w-8 shrink-0">
             <AvatarImage
               className="object-cover"
-              src={`${BASE_URL}/${typing?.sender.avatar}`}
+              src={typing?.sender.avatar}
               alt={`@${typing?.sender.username}`}
             />
             <AvatarFallback className="bg-primary/10 text-primary font-medium">
-              {typing?.sender?.first_name && typing?.sender?.last_name
-                ? `${typing?.sender.first_name.charAt(
-                    0
-                  )}${typing?.sender.last_name.charAt(0).toUpperCase()}`
+              {typing?.sender?.first_name
+                ? `${typing?.sender.first_name.charAt(0)}${
+                    typing?.sender.last_name
+                      ? typing?.sender.last_name.charAt(0).toUpperCase()
+                      : ""
+                  }`
                 : typing?.sender?.username.charAt(0).toUpperCase()}
             </AvatarFallback>
           </Avatar>

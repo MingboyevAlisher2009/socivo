@@ -1,7 +1,6 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 // import { useSocket } from "@/context/socket-context";
-import { BASE_URL } from "@/http/axios";
 import { useAppStore } from "@/store";
 import { X } from "lucide-react";
 // import { AxiosError } from "axios";
@@ -10,15 +9,13 @@ import { X } from "lucide-react";
 // import { toast } from "sonner";
 
 const ChatHeader = () => {
-  const { selectedChat, closeContact, onlineUsers, typing } =
-    useAppStore();
+  const { selectedChat, closeContact, onlineUsers, typing } = useAppStore();
   // const navigate = useNavigate();
   // const socket: any = useSocket();
 
-  const displayName =
-    selectedChat?.first_name && selectedChat?.last_name
-      ? `${selectedChat.first_name} ${selectedChat.last_name}`
-      : selectedChat?.username;
+  const displayName = selectedChat?.first_name
+    ? `${selectedChat.first_name} ${selectedChat.last_name || ""}`
+    : selectedChat?.username;
 
   const isOnlineUser = onlineUsers?.some(
     (onlineuser) => onlineuser === selectedChat?.id
@@ -54,14 +51,16 @@ const ChatHeader = () => {
         <Avatar className="h-12 w-12">
           <AvatarImage
             className="object-cover"
-            src={`${BASE_URL}/${selectedChat?.avatar}`}
+            src={selectedChat?.avatar}
             alt={`@${selectedChat?.username}`}
           />
           <AvatarFallback className="bg-primary/10 text-primary font-medium">
-            {selectedChat?.first_name && selectedChat?.last_name
-              ? `${selectedChat.first_name.charAt(0)}${selectedChat.last_name
-                  .charAt(0)
-                  .toUpperCase()}`
+            {selectedChat?.first_name
+              ? `${selectedChat.first_name.charAt(0)}${
+                  selectedChat.last_name
+                    ? selectedChat.last_name.charAt(0).toUpperCase()
+                    : ""
+                }`
               : selectedChat?.username.charAt(0).toUpperCase()}
           </AvatarFallback>
         </Avatar>

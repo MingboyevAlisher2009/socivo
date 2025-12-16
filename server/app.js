@@ -11,7 +11,7 @@ import notificationsRoutes from "./routes/notifications.routes.js";
 import setupSocket from "./socket.js";
 import path from "path";
 import { createDatabases } from "./config/db.js";
-import { clerkMiddleware } from "@clerk/express";
+import { clerkMiddleware, requireAuth } from "@clerk/express";
 import { serve } from "inngest/express";
 import { functions, inngest } from "./config/inngest.js";
 
@@ -37,10 +37,9 @@ app.use(
 // app.use(limiter);
 app.use(cookieParser());
 app.use(express.json());
-app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
-
 app.use(clerkMiddleware());
-app.use(errorMiddleware);
+
+app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
 app.use("/api/auth", authRoutes);
 app.use("/api/inngest", serve({ client: inngest, functions }));
@@ -56,6 +55,8 @@ app.use(express.static(path.join(__dirname, "client/dist")));
 app.get(/.*/, (req, res) => {
   res.sendFile(path.join(__dirname, "client", "dist", "index.html"));
 });
+
+app.use(errorMiddleware);
 
 const server = app.listen(PORT, async () => {
   await createDatabases();

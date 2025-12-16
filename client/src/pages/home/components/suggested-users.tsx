@@ -55,14 +55,21 @@ export default function SuggestedUsers() {
     getSuggestedUsers();
   }, []);
 
-  const getUserName = (user: IUser) => {
-    const senderName =
-      user.first_name && user.last_name
-        ? `${user.first_name} ${user.last_name}`
-        : user.username;
-    return senderName;
-  };
+  const getUserName = (user: IUser, state: "full" | "initials") => {
+    if (state === "full") {
+      return user?.first_name
+        ? `${user.first_name} ${user.last_name || ""}`
+        : user?.username;
+    } else {
+      const initials = user?.first_name
+        ? `${user?.first_name.charAt(0).toUpperCase()}${
+            user?.last_name ? user?.last_name.charAt(0).toUpperCase() : ""
+          }`
+        : user.username && user.username.charAt(0).toUpperCase();
 
+      return initials;
+    }
+  };
   return (
     <Card className="w-full sticky top-24">
       <CardHeader>
@@ -74,7 +81,7 @@ export default function SuggestedUsers() {
             <div
               onClick={() => navigate(`/profile/${user.id}`)}
               key={user.id}
-              className="flex items-center justify-between cursor-pointer"
+              className="flex items-center justify-between cursor-pointer line-clamp-1"
             >
               <div className="flex items-center gap-3">
                 <Avatar className="h-10 w-10">
@@ -83,15 +90,15 @@ export default function SuggestedUsers() {
                     alt={`@${user.username}`}
                   />
                   <AvatarFallback>
-                    {user.username.substring(0, 2).toUpperCase()}
+                    {getUserName(user, "initials")}
                   </AvatarFallback>
                 </Avatar>
                 <div className="grid gap-0.5">
                   <p className="text-sm font-medium leading-none line-clamp-1">
-                    {getUserName(user)}
+                    {getUserName(user, "full")}
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    @{user.username}
+                    @{user.username || user.email}
                   </p>
                 </div>
               </div>

@@ -6,11 +6,10 @@ export interface IUser {
     email: string;
     first_name?: string
     last_name?: string;
-    avatar?: string;
+    avatar?: string | null;
     bio?: string;
     followers: IUser[]
     following: IUser[]
-    is_verified: boolean;
     created_at: string;
     posts?: Post[]
 }

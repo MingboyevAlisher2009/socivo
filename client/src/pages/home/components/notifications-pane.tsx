@@ -13,10 +13,11 @@ export default function NotificationsPane() {
   const { notifications } = useAppStore();
 
   const getNotificationMessage = (notification: any) => {
-    const senderName =
-      notification.sender.first_name && notification.sender.last_name
-        ? `${notification.sender.first_name} ${notification.sender.last_name}`
-        : notification.sender.username;
+    const senderName = notification.sender.first_name
+      ? `${notification.sender.first_name} ${
+          notification.sender.last_name || ""
+        }`
+      : notification.sender.username;
 
     switch (notification.type) {
       case "like":

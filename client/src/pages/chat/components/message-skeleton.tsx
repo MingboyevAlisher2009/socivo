@@ -17,7 +17,7 @@ const MessageSkeleton = () => {
               !!isOtherUser ? "justify-start" : "justify-end"
             }`}
           >
-            <div className="flex gap-2 items-center">
+            <div className="flex gap-2 items-center mb-5">
               {!!isOtherUser && <Skeleton className="h-8 w-8 rounded-full" />}
               <Skeleton
                 className="rounded-2xl h-8"

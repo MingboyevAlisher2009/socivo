@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import axiosInstance, { BASE_URL } from "@/http/axios";
+import axiosInstance from "@/http/axios";
 import { useAppStore } from "@/store";
 import type { IUser } from "@/types";
 import { AxiosError } from "axios";
@@ -144,7 +144,7 @@ const Search = () => {
                     <CardContent className="flex w-full items-center justify-between gap-2 rounded-3xl p-4">
                       <div className="flex items-center gap-2">
                         <Avatar className="h-10 w-10">
-                          <AvatarImage src={`${BASE_URL}/${user.avatar}`} />
+                          <AvatarImage src={user.avatar as string} />
                           <AvatarFallback className="capitalize">
                             {user.username.charAt(0)}
                           </AvatarFallback>

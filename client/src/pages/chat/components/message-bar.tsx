@@ -7,7 +7,6 @@ import { useAppStore } from "@/store";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import Image from "@/components/image";
-import { BASE_URL } from "@/http/axios";
 import type { ChatUser } from "@/types";
 import useKeybord from "@/hooks/use-keyboard-hook";
 import { useSocket } from "@/context/socket-context";
@@ -62,10 +61,9 @@ const MessageBar = () => {
   };
 
   const getUserName = (user: ChatUser) => {
-    const senderName =
-      user.first_name && user.last_name
-        ? `${user.first_name} ${user.last_name}`
-        : user.username;
+    const senderName = user.first_name
+      ? `${user.first_name} ${user.last_name || ""}`
+      : user.username;
     return senderName;
   };
 
@@ -100,7 +98,7 @@ const MessageBar = () => {
               <X />
             </Button>
             <Image
-              url={`${BASE_URL}/${image}`}
+              url={image}
               className="w-20 h-20 rounded-md bg-center object-cover"
             />
           </div>
@@ -123,7 +121,7 @@ const MessageBar = () => {
               {reply.image && (
                 <Image
                   className="rounded-md w-20 h-20 object-cover mb-2"
-                  url={`${BASE_URL}/${reply.image}`}
+                  url={reply.image}
                 />
               )}
               <p className="text-sm text-muted-foreground line-clamp-3 break-all">

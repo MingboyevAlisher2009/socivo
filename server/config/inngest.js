@@ -7,13 +7,17 @@ const syncUser = inngest.createFunction(
   { id: "sync-user" },
   { event: "clerk/user.created" },
   async ({ event }) => {
-    const { id, email_addresses, first_name, last_name, image_url } =
-      event.data;
+    try {
+      const { id, email_addresses, first_name, last_name, image_url } =
+        event.data;
 
-    await pool.query(
-      `INSERT INTO users (clerk_id, email, first_name, last_name, avatar) VALUES($1, $2, $3, $4, $5);`,
-      [id, email_addresses[0].email_address, first_name, last_name, image_url]
-    );
+      await pool.query(
+        `INSERT INTO users (clerk_id, email, first_name, last_name, avatar) VALUES($1, $2, $3, $4, $5);`,
+        [id, email_addresses[0].email_address, first_name, last_name, image_url]
+      );
+    } catch (error) {
+      console.log(error);
+    }
   }
 );
 

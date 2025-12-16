@@ -1,9 +1,9 @@
 import { compare, hash } from "bcrypt";
-import pool from "../config/db.js";
 import BaseError from "../error/base.error.js";
 import mailService from "../services/mail.service.js";
 import { generateToken } from "../services/token.service.js";
 import { existsSync, renameSync, unlinkSync } from "fs";
+import pool from "../config/db.js";
 
 const validEmail = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
@@ -186,7 +186,6 @@ export const getMe = async (req, res, next) => {
       u.last_name, 
       u.avatar, 
       u.bio,
-      u.is_verified, 
       u.created_at,
       COALESCE(
         json_agg(
@@ -364,7 +363,7 @@ export const updateAvatar = async (req, res, next) => {
 
     const { rows } = await pool.query(
       `UPDATE users SET avatar = $1 WHERE id = $2;`,
-      [fileName, userId]
+      [`${process.env.SERVER_URL}/${fileName}`, userId]
     );
 
     if (!rows) {
@@ -378,7 +377,7 @@ export const updateAvatar = async (req, res, next) => {
     }
 
     return successResponse(res, 200, {
-      imageUrl: fileName,
+      imageUrl: `${process.env.SERVER_URL}/${fileName}`,
       message: "Profile image updated successfully",
     });
   } catch (error) {
@@ -404,17 +403,18 @@ export const deleteAvatar = async (req, res, next) => {
       return errorResponse(res, 404, "User not found");
     }
 
-    if (user.avatar && existsSync(user.avatar)) {
+    const filePath = user.avatar
+      ? `uploads${user.avatar.split("uploads").pop() || ""}`
+      : null;
+
+    if (filePath && existsSync(filePath)) {
       try {
-        unlinkSync(user.avatar);
+        unlinkSync(filePath);
       } catch (error) {
         console.error("File deletion error:", error);
         return errorResponse(res, 500, "Error removing image file");
       }
-    } else {
-      return errorResponse(res, 404, "No profile image to remove");
     }
-
     await pool.query(`UPDATE users SET avatar = null WHERE id = $1;`, [userId]);
 
     return successResponse(res, 201, "Profile image removed successfully");

@@ -189,16 +189,15 @@ const Room = () => {
       sessionStorage.getItem("selected-chat-data") as any
     );
     if (state === "full") {
-      return user?.first_name && user.last_name
-        ? `${user.first_name} ${user.last_name}`
+      return user?.first_name
+        ? `${user.first_name} ${user.last_name || ""}`
         : user?.username;
     } else {
-      const initials =
-        user?.first_name && user?.last_name
-          ? `${user?.first_name.charAt(0).toUpperCase()}${user?.last_name
-              .charAt(0)
-              .toUpperCase()}`
-          : user.username.charAt(0).toUpperCase();
+      const initials = user?.first_name
+        ? `${user?.first_name.charAt(0).toUpperCase()}${
+            user?.last_name ? user?.last_name.charAt(0).toUpperCase() : ""
+          }`
+        : user.username.charAt(0).toUpperCase();
 
       return initials;
     }

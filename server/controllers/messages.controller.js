@@ -160,14 +160,7 @@ export const sendMessage = async (req, res, next) => {
         LEFT JOIN users rs ON rs.id = r.sender
         LEFT JOIN users rr ON rr.id = r.recipient;
         `,
-      [
-        userId,
-        type ? recipient.id : recipient,
-        reply,
-        message,
-        image,
-        type,
-      ]
+      [userId, type ? recipient.id : recipient, reply, message, image, type]
     );
 
     sendSocketMessage(rows[0]);
@@ -277,7 +270,7 @@ export const uploadImage = async (req, res, next) => {
 
     renameSync(req.file.path, imageName);
 
-    successResponse(res, 201, imageName);
+    successResponse(res, 201, `${process.env.SERVER_URL}/${imageName}`);
   } catch (error) {
     console.log("Uploading image error:", error);
     next(error);
@@ -287,12 +280,15 @@ export const uploadImage = async (req, res, next) => {
 export const deleteImage = (req, res, next) => {
   const { image } = req.query;
   try {
-    if (existsSync(image)) {
-      rmSync(image, { force: true });
-      console.log(`File deleted: ${image}`);
+    const imagePath = image
+      ? `uploads${image.split("uploads").pop() || ""}`
+      : null;
+    if (existsSync(imagePath)) {
+      rmSync(imagePath, { force: true });
+      console.log(`File deleted: ${imagePath}`);
     }
 
-    const folderPath = path.dirname(image);
+    const folderPath = path.dirname(imagePath);
 
     if (existsSync(folderPath) && !readdirSync(folderPath).length) {
       rmSync(folderPath, { recursive: true, force: true });

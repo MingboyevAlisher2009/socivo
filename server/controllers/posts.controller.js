@@ -37,7 +37,6 @@ export const getPosts = async (req, res, next) => {
       users.last_name AS author_last_name,
       users.avatar AS author_avatar,
       users.bio AS author_bio,
-      users.is_verified AS author_is_verified,
 
        COALESCE(
        json_agg(
@@ -96,7 +95,6 @@ export const getPosts = async (req, res, next) => {
         author_last_name,
         author_avatar,
         author_bio,
-        author_is_verified,
         ...rest
       } = post;
 
@@ -112,7 +110,6 @@ export const getPosts = async (req, res, next) => {
           last_name: author_last_name,
           avatar: author_avatar,
           bio: author_bio,
-          is_verified: author_is_verified,
         },
       };
     });
@@ -230,7 +227,7 @@ export const createPost = async (req, res, next) => {
 
     await pool.query(
       `INSERT INTO posts (user_id, content, image) VALUES ($1, $2, $3);`,
-      [userId, content, filename]
+      [userId, content, `${process.env.SERVER_URL}/${filename}`]
     );
 
     return successResponse(res, 201, "Post created succefully.");
@@ -565,8 +562,12 @@ export const deletePost = async (req, res, next) => {
       return errorResponse(res, 403, "Author can delete this post.");
     }
 
-    if (post.image && existsSync(post.image)) {
-      unlinkSync(post.image);
+    const imagePath = post.image
+      ? `uploads${post.image.split("uploads").pop() || ""}`
+      : null;
+
+    if (imagePath && existsSync(imagePath)) {
+      unlinkSync(imagePath);
     }
 
     await pool.query(`DELETE FROM posts WHERE id = $1`, [id]);

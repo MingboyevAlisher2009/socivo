@@ -1,7 +1,6 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { BASE_URL } from "@/http/axios";
 import { useAppStore } from "@/store";
 import { useEffect, useState } from "react";
 import ContactListSkeleton from "./contact-list-skeleton";
@@ -52,78 +51,79 @@ const ContactsList = () => {
         <h1>Messages</h1>
         <ScrollArea className="h-[40rem]">
           {contactLoading && <ContactListSkeleton />}
-          {!contactLoading && filteredContacts && filteredContacts.length ? (
-            filteredContacts.map((contact, i) => {
-              const displayName =
-                contact?.first_name && contact?.last_name
-                  ? `${contact.first_name} ${contact.last_name}`
+          {!contactLoading && filteredContacts && filteredContacts.length
+            ? filteredContacts.map((contact, i) => {
+                const displayName = contact?.first_name
+                  ? `${contact.first_name} ${contact.last_name || ""}`
                   : contact?.username;
 
-              const isOnlineUser = onlineUsers?.some(
-                (onlineuser) => onlineuser === contact?.id
-              );
+                const isOnlineUser = onlineUsers?.some(
+                  (onlineuser) => onlineuser === contact?.id
+                );
 
-              const notification =
-                contact.lastMessage?.recipient.id === userInfo?.id &&
-                !contact.lastMessage?.read;
+                const notification =
+                  contact.lastMessage?.recipient.id === userInfo?.id &&
+                  !contact.lastMessage?.read;
 
-              return (
-                <div
-                  key={i}
-                  onClick={() => getMessages(contact)}
-                  className={`flex items-center gap-4 p-4 ${
-                    contact.id === selectedChat?.id && "bg-accent"
-                  } hover:bg-accent/30 rounded-md cursor-pointer`}
-                >
-                  <div className="relative">
-                    <Avatar className="h-12 w-12">
-                      <AvatarImage
-                        className="object-cover"
-                        src={`${BASE_URL}/${contact?.avatar}`}
-                        alt={`@${contact?.username}`}
-                      />
-                      <AvatarFallback className="bg-primary/10 text-primary font-medium">
-                        {contact?.first_name && contact?.last_name
-                          ? `${contact.first_name.charAt(0)}${contact.last_name
-                              .charAt(0)
-                              .toUpperCase()}`
-                          : contact?.username.charAt(0).toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                    {isOnlineUser && (
-                      <div className="absolute bottom-0 right-0 z-50 w-3 h-3 ring-2 bg-primary ring-[#101012] rounded-full" />
+                return (
+                  <div
+                    key={i}
+                    onClick={() => getMessages(contact)}
+                    className={`flex items-center gap-4 p-4 ${
+                      contact.id === selectedChat?.id && "bg-accent"
+                    } hover:bg-accent/30 rounded-md cursor-pointer`}
+                  >
+                    <div className="relative">
+                      <Avatar className="h-12 w-12">
+                        <AvatarImage
+                          className="object-cover"
+                          src={contact?.avatar}
+                          alt={`@${contact?.username}`}
+                        />
+                        <AvatarFallback className="bg-primary/10 text-primary font-medium">
+                          {contact?.first_name
+                            ? `${contact.first_name.charAt(0)}${
+                                contact.last_name
+                                  ? contact.last_name.charAt(0).toUpperCase()
+                                  : ""
+                              }`
+                            : contact?.username.charAt(0).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      {isOnlineUser && (
+                        <div className="absolute bottom-0 right-0 z-50 w-3 h-3 ring-2 bg-primary ring-[#101012] rounded-full" />
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-foreground leading-none">
+                        {displayName}
+                      </h3>
+                      <p className="text-sm text-muted-foreground mt-1 line-clamp-1">
+                        {contact.lastMessage?.type === "call"
+                          ? "Incoming call"
+                          : contact.lastMessage?.type === "video_call" &&
+                            "Incoming video call"}
+                        {contact.lastMessage
+                          ? contact.lastMessage?.image
+                            ? "Image"
+                            : contact.lastMessage.message
+                          : "No message yet"}
+                      </p>
+                    </div>
+                    {notification && (
+                      <span className="relative flex size-3">
+                        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75"></span>
+                        <span className="relative inline-flex size-3 rounded-full bg-primary"></span>
+                      </span>
                     )}
                   </div>
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-foreground leading-none">
-                      {displayName}
-                    </h3>
-                    <p className="text-sm text-muted-foreground mt-1 line-clamp-1">
-                      {contact.lastMessage?.type === "call"
-                        ? "Incoming call"
-                        : contact.lastMessage?.type === "video_call" &&
-                          "Incoming video call"}
-                      {contact.lastMessage
-                        ? contact.lastMessage?.image
-                          ? "Image"
-                          : contact.lastMessage.message
-                        : "No message yet"}
-                    </p>
-                  </div>
-                  {notification && (
-                    <span className="relative flex size-3">
-                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75"></span>
-                      <span className="relative inline-flex size-3 rounded-full bg-primary"></span>
-                    </span>
-                  )}
-                </div>
-              );
-            })
-          ) : (
-            <p className="text-center mt-5 text-muted-foreground">
-              Contacts not found
-            </p>
-          )}
+                );
+              })
+            : !contactLoading && (
+                <p className="text-center mt-5 text-muted-foreground">
+                  Contacts not found
+                </p>
+              )}
         </ScrollArea>
       </div>
     </div>

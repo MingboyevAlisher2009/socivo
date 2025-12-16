@@ -1,7 +1,7 @@
 import express from "express";
 import cookieParser from "cookie-parser";
 import { Server } from "socket.io";
-import { verifyToken } from "./services/token.service.js";
+import { verifyToken } from "@clerk/express";
 
 let socketIo;
 const userSocketMap = new Map();
@@ -81,24 +81,17 @@ const setupSocket = (server) => {
 
   socketIo = io;
 
-  io.use((socket, next) => {
-    const req = socket.request;
-    cookieParser()(req, {}, (err) => {
-      if (err) return next(err);
+  io.use(async (socket, next) => {
+    try {
+      const userId = socket.handshake.query.userId;
 
-      const token = req.cookies?.jwt;
-      if (!token) {
-        return next(new Error("No auth token"));
-      }
+      if (!userId) return next(new Error("No userId"));
 
-      try {
-        const payload = verifyToken(token);
-        socket.userId = payload.userId;
-        return next();
-      } catch (err) {
-        return next(new Error("Invalid token"));
-      }
-    });
+      socket.userId = userId;
+      next();
+    } catch {
+      next(new Error("Unauthorized"));
+    }
   });
 
   io.on("connection", (socket) => {

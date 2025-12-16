@@ -1,7 +1,6 @@
 import Image from "@/components/image";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
-import { BASE_URL } from "@/http/axios";
 import { useAppStore } from "@/store";
 import {
   Ellipsis,
@@ -80,10 +79,9 @@ const PostComponent = () => {
     getUserInfo();
   };
 
-  const displayName =
-    post?.author?.first_name && post.author?.last_name
-      ? `${post.author.first_name} ${post.author.last_name}`
-      : post?.author?.username;
+  const displayName = post?.author?.first_name
+    ? `${post.author.first_name} ${post.author.last_name || ""}`
+    : post?.author?.username;
 
   if (isLoading) {
     return <PostSkeleton />;
@@ -93,7 +91,7 @@ const PostComponent = () => {
     <>
       <SeoHead
         title={"Post"}
-        image={`${BASE_URL}/${post?.image}`}
+        image={post?.image as string}
         description={post?.content}
       />
 
@@ -106,14 +104,16 @@ const PostComponent = () => {
                   <Avatar className="h-12 w-12 ring-2 ring-primary/10">
                     <AvatarImage
                       className="object-cover"
-                      src={`${BASE_URL}/${post?.author.avatar}`}
+                      src={post?.author.avatar as string}
                       alt={`@${post?.author.username}`}
                     />
                     <AvatarFallback className="bg-primary/10 text-primary font-medium">
-                      {post?.author?.first_name && post.author?.last_name
-                        ? `${post.author.first_name.charAt(
-                            0
-                          )}${post.author.last_name.charAt(0).toUpperCase()}`
+                      {post?.author?.first_name
+                        ? `${post.author.first_name.charAt(0)}${
+                            post.author.last_name
+                              ? post.author.last_name.charAt(0).toUpperCase()
+                              : ""
+                          }`
                         : post?.author.username.charAt(0).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
@@ -156,7 +156,7 @@ const PostComponent = () => {
                 <div className="relative overflow-hidden">
                   <Image
                     className="w-full aspect-square object-cover"
-                    url={`${BASE_URL}/${post?.image}`}
+                    url={post?.image as string}
                   />
                 </div>
 
@@ -214,14 +214,16 @@ const PostComponent = () => {
                     <Avatar className="h-10 w-10 ring-2 ring-primary/10">
                       <AvatarImage
                         className="object-cover"
-                        src={`${BASE_URL}/${post?.author.avatar}`}
+                        src={post?.author.avatar as string}
                         alt={`@${post?.author.username}`}
                       />
                       <AvatarFallback className="bg-primary/10 text-primary font-medium">
-                        {post?.author?.first_name && post.author?.last_name
-                          ? `${post.author.first_name.charAt(
-                              0
-                            )}${post.author.last_name.charAt(0).toUpperCase()}`
+                        {post?.author?.first_name
+                          ? `${post.author.first_name.charAt(0)}${
+                              post.author.last_name
+                                ? post.author.last_name.charAt(0).toUpperCase()
+                                : ""
+                            }`
                           : post?.author.username.charAt(0).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
@@ -255,10 +257,11 @@ const PostComponent = () => {
                 <div className="space-y-6">
                   {post?.comments.length ? (
                     post.comments.map((comment) => {
-                      const displayName =
-                        comment?.author?.first_name && comment.author?.last_name
-                          ? `${comment.author.first_name} ${comment.author.last_name}`
-                          : comment?.author?.username;
+                      const displayName = comment?.author?.first_name
+                        ? `${comment.author.first_name} ${
+                            comment.author.last_name || ""
+                          }`
+                        : comment?.author?.username;
 
                       const getInitials = () => {
                         if (
@@ -286,10 +289,7 @@ const PostComponent = () => {
                             <div className="flex items-center gap-2">
                               <Avatar className="h-9 w-9 ring-2 ring-primary/10">
                                 <AvatarImage
-                                  src={
-                                    `${BASE_URL}/${comment.author.avatar}` ||
-                                    "/placeholder.svg"
-                                  }
+                                  src={comment.author.avatar as string}
                                   alt={`@${comment.author.username}`}
                                 />
                                 <AvatarFallback className="text-xs bg-primary/10 text-primary font-medium">
@@ -336,7 +336,7 @@ const PostComponent = () => {
                     <Avatar className="h-20 w-20 mx-auto ring-4 ring-primary/10">
                       <AvatarImage
                         className="object-cover"
-                        src={`${BASE_URL}/${post?.author.avatar}`}
+                        src={post?.author.avatar as string}
                         alt={`@${post?.author.username}`}
                       />
                       <AvatarFallback className="text-xl bg-primary/10 text-primary font-semibold">
@@ -403,7 +403,7 @@ const PostComponent = () => {
         isOpen={open}
         onOpenChange={() => setOpen(false)}
         title={post?.content}
-        imageUrl={`${BASE_URL}/${post?.image}`}
+        imageUrl={post?.image as string}
         url={`${window.location.href}/post/${post?.id}`}
       />
     </>

@@ -5,7 +5,6 @@ import {
   CardFooter,
   CardHeader,
 } from "@/components/ui/card";
-import { BASE_URL } from "@/http/axios";
 import { Heart, Loader2, MessageCircle, Send, Share2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import PostsFeedSkeleton from "./posts-feed-skeleton";
@@ -101,18 +100,17 @@ export default function PostsFeed() {
     <AnimatePresence mode="popLayout">
       {comments.length ? (
         comments.map((comment: any, index: number) => {
-          const displayName =
-            comment.author?.first_name && comment.author?.last_name
-              ? `${comment.author.first_name} ${comment.author.last_name}`
-              : comment.author?.username;
+          const displayName = comment.author?.first_name
+            ? `${comment.author.first_name} ${comment.author.last_name || ""}`
+            : comment.author?.username;
 
           const getInitials = () => {
-            if (comment.author.first_name && comment.author.last_name) {
-              return `${comment.author.first_name
-                .charAt(0)
-                .toUpperCase()}${comment.author.last_name
-                .charAt(0)
-                .toUpperCase()}`;
+            if (comment.author.first_name) {
+              return `${comment.author.first_name.charAt(0).toUpperCase()}${
+                comment.author.last_name
+                  ? comment.author.last_name.charAt(0).toUpperCase()
+                  : ""
+              }`;
             }
             return comment.author.username?.charAt(0).toUpperCase() || "U";
           };
@@ -178,10 +176,9 @@ export default function PostsFeed() {
             posts &&
             posts &&
             posts.map((post, i) => {
-              const displayName =
-                post.author?.first_name && post.author?.last_name
-                  ? `${post.author.first_name} ${post.author.last_name}`
-                  : post.author?.username;
+              const displayName = post.author?.first_name
+                ? `${post.author.first_name} ${post.author.last_name || ""}`
+                : post.author?.username;
 
               return (
                 <motion.div
@@ -204,16 +201,18 @@ export default function PostsFeed() {
                         <Avatar className="h-10 w-10">
                           <AvatarImage
                             className="object-cover"
-                            src={`${BASE_URL}/${post.author.avatar}`}
+                            src={post.author.avatar as string}
                             alt={`@${post.author.username}`}
                           />
                           <AvatarFallback>
-                            {post.author?.first_name && post.author?.last_name
-                              ? `${post.author.first_name.charAt(
-                                  0
-                                )}${post.author.last_name
-                                  .charAt(0)
-                                  .toUpperCase()}`
+                            {post.author?.first_name
+                              ? `${post.author.first_name.charAt(0)}${
+                                  post.author.last_name
+                                    ? post.author.last_name
+                                        .charAt(0)
+                                        .toUpperCase()
+                                    : ""
+                                }`
                               : post.author.username.charAt(0).toUpperCase()}
                           </AvatarFallback>
                         </Avatar>
@@ -231,7 +230,7 @@ export default function PostsFeed() {
                       <p className="text-sm">{post.content}</p>
                       {post.image && (
                         <Image
-                          url={`${BASE_URL}/${post.image}`}
+                          url={post.image}
                           className="rounded-md object-cover w-full max-h-[40rem]"
                         />
                       )}
@@ -296,7 +295,7 @@ export default function PostsFeed() {
       <ShareModal
         url={`${window.location.href}post/${post?.id}`}
         title={post?.content}
-        imageUrl={`${BASE_URL}/${post?.image}`}
+        imageUrl={post?.image as string}
         isOpen={open}
         onOpenChange={() => setOpen(false)}
       />

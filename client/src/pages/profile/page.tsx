@@ -1,6 +1,6 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
-import axiosInstance, { BASE_URL } from "@/http/axios";
+import axiosInstance from "@/http/axios";
 import { useAppStore } from "@/store";
 import type { IUser } from "@/types";
 import { useEffect, useRef, useState, type ChangeEvent } from "react";
@@ -43,9 +43,9 @@ import SeoHead from "@/components/hamlet";
 import CreatePostModal from "@/components/create-post-modal";
 
 const Profile = () => {
-  const { userInfo, getUserInfo, getMessages } = useAppStore();
+  const { userInfo, setUserInfo, getUserInfo, getMessages } = useAppStore();
   const { username } = useParams();
-  const [user, setUser] = useState(userInfo);
+  const [user, setUser] = useState<IUser>();
   const [isOwnProfile, setIsOwnProfile] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -113,7 +113,7 @@ const Profile = () => {
       return;
     }
 
-    getMessages(user);
+    getMessages(user as any);
     navigate("/direct");
   };
 
@@ -169,7 +169,7 @@ const Profile = () => {
     setIsLoading(true);
     try {
       await axiosInstance.delete(`/auth/avatar/${userInfo?.id}`);
-      getUserInfo();
+      setUserInfo({ ...user, avatar: null } as any);
     } catch (error) {
       toast.error("Couldn't remove the photo");
     } finally {
@@ -180,7 +180,10 @@ const Profile = () => {
   useEffect(() => {
     if (!userInfo || !username) return;
 
-    if (userInfo.username !== username) {
+    if (
+      userInfo.username !== username &&
+      userInfo?.id.toString() !== username.toString()
+    ) {
       getUserData();
       setIsOwnProfile(false);
     } else {
@@ -189,16 +192,15 @@ const Profile = () => {
     }
   }, [username]);
 
-  const displayName =
-    user?.first_name && user.last_name
-      ? `${user.first_name} ${user.last_name}`
-      : user?.username;
+  const displayName = user?.first_name
+    ? `${user.first_name} ${user.last_name || ""}`
+    : user?.username;
 
   const getInitials = () => {
-    if (user?.first_name && user?.last_name) {
-      return `${user.first_name.charAt(0).toUpperCase()}${user.last_name
-        .charAt(0)
-        .toUpperCase()}`;
+    if (user?.first_name) {
+      return `${user.first_name.charAt(0).toUpperCase()}${
+        user.last_name ? user.last_name.charAt(0).toUpperCase() : ""
+      }`;
     }
     return user?.username?.charAt(0).toUpperCase() || "U";
   };
@@ -255,7 +257,7 @@ const Profile = () => {
     <>
       <SeoHead
         title={`@${user?.username}`}
-        image={user?.avatar && `${BASE_URL}/${user?.avatar}`}
+        image={user?.avatar as string}
         description={user?.bio}
       />
 
@@ -279,9 +281,7 @@ const Profile = () => {
                   <Avatar className="w-full h-full shadow-lg">
                     <AvatarImage
                       className="object-cover"
-                      src={
-                        user?.avatar ? `${BASE_URL}/${user.avatar}` : undefined
-                      }
+                      src={user?.avatar as string}
                       alt={displayName}
                     />
                     <AvatarFallback className="text-2xl md:text-3xl font-semibold">
@@ -373,7 +373,7 @@ const Profile = () => {
                   animate={{ opacity: 1 }}
                   transition={{ duration: 0.6, delay: 0.4 }}
                 >
-                  @{user?.username}
+                  @{user?.username ? user?.username : userInfo?.email}
                 </motion.p>
               </motion.div>
 
@@ -490,7 +490,7 @@ const Profile = () => {
                     <Card className="group overflow-hidden border-0 p-0 shadow-sm hover:shadow-md transition-all duration-200">
                       <CardContent className="p-0 relative aspect-square">
                         <motion.img
-                          src={`${BASE_URL}/${post.image}`}
+                          src={post.image as string}
                           alt={post.content}
                           className="w-full h-52 object-cover"
                           whileHover={{ scale: 1.05 }}

@@ -5,11 +5,11 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Heart, MessageCircle, UserPlus, Bell, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAppStore } from "@/store";
-import axiosInstance, { BASE_URL } from "@/http/axios";
 import { NotificationsSkeleton } from "./components/notifications-skeleton";
 import Image from "@/components/image";
 import { Link } from "react-router-dom";
 import SeoHead from "@/components/hamlet";
+import axiosInstance from "@/http/axios";
 
 const getNotificationIcon = (type: string) => {
   switch (type) {
@@ -25,10 +25,9 @@ const getNotificationIcon = (type: string) => {
 };
 
 const getNotificationMessage = (notification: any) => {
-  const senderName =
-    notification.sender.first_name && notification.sender.last_name
-      ? `${notification.sender.first_name} ${notification.sender.last_name}`
-      : notification.sender.username;
+  const senderName = notification.sender.first_name
+    ? `${notification.sender.first_name} ${notification.sender.last_name || ""}`
+    : notification.sender.username;
 
   switch (notification.type) {
     case "like":
@@ -235,7 +234,7 @@ const Notifications = () => {
                         {notification.post && notification.post.id && (
                           <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg mt-2">
                             <Image
-                              url={`${BASE_URL}/${notification.post.image}`}
+                              url={notification.post.image as string}
                               className="h-14 w-14 rounded-lg object-cover border"
                             />
                             <div className="flex-1 min-w-0">
