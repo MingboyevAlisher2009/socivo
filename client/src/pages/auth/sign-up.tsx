@@ -1,42 +1,7 @@
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { motion } from "framer-motion";
-import { useForm } from "react-hook-form";
-import type z from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { signUpSchema } from "../../schema/form-schemas";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Eye, EyeOff, Leaf, Loader2 } from "lucide-react";
-import { Link } from "react-router-dom";
-import { useState } from "react";
-import { useAppStore } from "@/store";
 import SeoHead from "@/components/hamlet";
+import { SignUp as SignUpWithClerck } from "@clerk/clerk-react";
 
 const SignUp = () => {
-  const [isShowPassword, setIsShowPassword] = useState(false);
-  const { signUp, signUpLoading } = useAppStore();
-
-  const form = useForm<z.infer<typeof signUpSchema>>({
-    resolver: zodResolver(signUpSchema),
-    defaultValues: {
-      username: "",
-      email: "",
-      password: "",
-    },
-  });
-
-  function onSubmit(values: z.infer<typeof signUpSchema>) {
-    signUp(values.username.toLowerCase(), values.email, values.password);
-  }
-
   return (
     <>
       <SeoHead
@@ -44,8 +9,9 @@ const SignUp = () => {
         description="Create your free account to join the community, share posts, comment, and connect with others today!"
       />
 
-      <div className="min-h-screen w-full flex justify-center items-center p-4">
-        <motion.section
+      <div className="max-h-screen w-full flex justify-center items-center p-4">
+        <SignUpWithClerck signInUrl="/auth/login" />
+        {/* <motion.section
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ type: "spring", stiffness: 80, damping: 10 }}
@@ -81,7 +47,6 @@ const SignUp = () => {
                   onSubmit={form.handleSubmit(onSubmit)}
                   className="space-y-8"
                 >
-                  {/* Username Field */}
                   <FormField
                     control={form.control}
                     name="username"
@@ -110,7 +75,6 @@ const SignUp = () => {
                     )}
                   />
 
-                  {/* Email Field */}
                   <FormField
                     control={form.control}
                     name="email"
@@ -139,7 +103,6 @@ const SignUp = () => {
                     )}
                   />
 
-                  {/* Password Field */}
                   <FormField
                     control={form.control}
                     name="password"
@@ -185,7 +148,6 @@ const SignUp = () => {
                     )}
                   />
 
-                  {/* Submit Button */}
                   <motion.div
                     initial={{ y: 20, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
@@ -204,7 +166,6 @@ const SignUp = () => {
                     </Button>
                   </motion.div>
 
-                  {/* Link to Login */}
                   <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
@@ -223,7 +184,7 @@ const SignUp = () => {
               </Form>
             </CardContent>
           </Card>
-        </motion.section>
+        </motion.section> */}
       </div>
     </>
   );

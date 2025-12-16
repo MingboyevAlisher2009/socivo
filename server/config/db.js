@@ -23,6 +23,7 @@ export const createDatabases = async () => {
 
       CREATE TABLE IF NOT EXISTS users (
         id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        clerk_id TEXT,
         first_name VARCHAR(100),
         last_name VARCHAR(100),
         avatar TEXT,

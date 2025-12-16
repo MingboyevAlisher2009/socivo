@@ -87,7 +87,7 @@ export default function SuggestedUsers() {
                   </AvatarFallback>
                 </Avatar>
                 <div className="grid gap-0.5">
-                  <p className="text-sm font-medium leading-none">
+                  <p className="text-sm font-medium leading-none line-clamp-1">
                     {getUserName(user)}
                   </p>
                   <p className="text-sm text-muted-foreground">

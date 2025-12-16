@@ -27,16 +27,16 @@ const LoadingScreen = () => (
   </div>
 );
 
-const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
-  const { userInfo, loading } = useAppStore();
+// const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
+//   const { userInfo, loading } = useAppStore();
 
-  if (loading) {
-    return <LoadingScreen />;
-  }
-  if (!userInfo) return <Navigate to="/auth/login" replace />;
+//   if (loading) {
+//     return <LoadingScreen />;
+//   }
+//   // if (!userInfo) return <Navigate to="/auth/login" replace />;
 
-  return <>{children}</>;
-};
+//   return <>{children}</>;
+// };
 
 const PublicRoute = ({ children }: { children: React.ReactNode }) => {
   const { userInfo, loading } = useAppStore();
@@ -68,89 +68,26 @@ const App = () => {
   return (
     <>
       <Routes>
-        <Route
-          path="/"
-          element={
-            <PrivateRoute>
-              <Home />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/profile/:username"
-          element={
-            <PrivateRoute>
-              <Profile />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/post/:id"
-          element={
-            <PrivateRoute>
-              <Post />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/search"
-          element={
-            <PrivateRoute>
-              <Search />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/notifications"
-          element={
-            <PrivateRoute>
-              <Notifications />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/direct"
-          element={
-            <PrivateRoute>
-              <Chat />
-            </PrivateRoute>
-          }
-        />
+        <Route path="/" element={<Home />} />
+        <Route path="/profile/:username" element={<Profile />} />
+        <Route path="/post/:id" element={<Post />} />
+        <Route path="/search" element={<Search />} />
+        <Route path="/notifications" element={<Notifications />} />
+        <Route path="/direct" element={<Chat />} />
 
-        <Route
-          path="/room/:id"
-          element={
-            <PrivateRoute>
-              <Room />
-            </PrivateRoute>
-          }
-        />
+        <Route path="/room/:id" element={<Room />} />
 
         <Route path="/auth">
-          <Route
-            path="login"
-            element={
-              <PublicRoute>
-                <Login />
-              </PublicRoute>
-            }
-          />
-          <Route
-            path="sign-up"
-            element={
-              <PublicRoute>
-                <SignUp />
-              </PublicRoute>
-            }
-          />
-          <Route
+          <Route path="login" element={<Login />} />
+          <Route path="sign-up" element={<SignUp />} />
+          {/* <Route
             path="verification"
             element={
               <PublicRoute>
                 <Verification />
               </PublicRoute>
             }
-          />
+          /> */}
         </Route>
         <Route path="*" element={<NotFoundPage />} />
       </Routes>

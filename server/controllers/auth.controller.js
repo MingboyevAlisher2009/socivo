@@ -1,5 +1,5 @@
 import { compare, hash } from "bcrypt";
-import pool from "../db/db.js";
+import pool from "../config/db.js";
 import BaseError from "../error/base.error.js";
 import mailService from "../services/mail.service.js";
 import { generateToken } from "../services/token.service.js";

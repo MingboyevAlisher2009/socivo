@@ -1,6 +1,6 @@
 import nodemailer from "nodemailer";
 import bcrypt from "bcrypt";
-import pool from "../db/db.js";
+import pool from "../config/db.js";
 import BaseError from "../error/base.error.js";
 import { Resend } from "resend";
 

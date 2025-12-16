@@ -19,6 +19,7 @@ import { Link } from "react-router-dom";
 import { useState } from "react";
 import { useAppStore } from "@/store";
 import SeoHead from "@/components/hamlet";
+import { SignIn } from "@clerk/clerk-react";
 
 const Login = () => {
   const [isShowPassword, setIsShowPassword] = useState(false);
@@ -43,8 +44,9 @@ const Login = () => {
         description="Login to access your account, connect with the community, and continue where you left off."
       />
 
-      <div className="min-h-screen w-full flex justify-center items-center p-4">
-        <motion.section
+      <div className="max-h-screen w-full flex justify-center items-center p-4">
+        <SignIn signUpUrl="/auth/sign-up"/>
+        {/* <motion.section
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ type: "spring", stiffness: 80, damping: 10 }}
@@ -155,7 +157,6 @@ const Login = () => {
                     )}
                   />
 
-                  {/* Submit Button */}
                   <motion.div
                     initial={{ y: 20, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
@@ -192,7 +193,7 @@ const Login = () => {
               </Form>
             </CardContent>
           </Card>
-        </motion.section>
+        </motion.section> */}
       </div>
     </>
   );

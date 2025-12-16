@@ -1,5 +1,5 @@
 import path from "path";
-import pool from "../db/db.js";
+import pool from "../config/db.js";
 import { sendSocketMessage } from "../socket.js";
 import { existsSync, mkdirSync, readdirSync, renameSync, rmSync } from "fs";
 

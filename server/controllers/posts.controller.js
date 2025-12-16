@@ -1,4 +1,4 @@
-import pool from "../db/db.js";
+import pool from "../config/db.js";
 import BaseError from "../error/base.error.js";
 import { existsSync, renameSync, unlinkSync } from "fs";
 import { sendComment, sendLike, sendNotifications } from "../socket.js";
