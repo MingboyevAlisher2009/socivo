@@ -91,7 +91,7 @@ const ContactsList = () => {
                         </AvatarFallback>
                       </Avatar>
                       {isOnlineUser && (
-                        <div className="absolute bottom-0 right-0 z-50 w-3 h-3 ring-2 bg-primary ring-[#101012] rounded-full" />
+                        <div className="absolute bottom-0 right-0 z-40 w-3 h-3 ring-2 bg-primary ring-[#101012] rounded-full" />
                       )}
                     </div>
                     <div className="flex-1">

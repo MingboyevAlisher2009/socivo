@@ -78,6 +78,7 @@ const Room = () => {
     const handleIncomingCall = (call: any) => {
       call.answer(stream);
       call.on("stream", (peerStream: any) => {
+        alert("peer 1");
         dispatch(addPeerStreamAction(call.peer, peerStream));
       });
       call.on("error", (err: any) => console.error("Call error:", err));
@@ -112,6 +113,11 @@ const Room = () => {
       socket.off("muted-user");
       socket.off("unmuted-user");
       socket.off("call-ended");
+      stream?.getTracks().forEach((track) => {
+        if (track.readyState == "live") {
+          track.stop();
+        }
+      });
     };
   }, []);
 
@@ -120,22 +126,21 @@ const Room = () => {
 
     const handleUserJoined = ({ peerId }: { peerId: string }) => {
       if (peerId === me.id) return;
-      if (!streamRef.current) {
-        console.warn("No stream yet, cannot call", peerId);
-        return;
-      }
+      const tryCall = () => {
+        if (!streamRef.current) {
+          console.warn("No stream yet, cannot call", peerId);
+          return;
+        }
+        const call = me.call(peerId, streamRef.current);
+        if (!call) return;
+        call.on("stream", (peerStream) => {
+          alert("peer 2");
+          dispatch(addPeerStreamAction(peerId, peerStream));
+        });
+        call.on("error", console.error);
+      };
 
-      console.log("Calling new user:", peerId);
-
-      const call = me.call(peerId, streamRef.current);
-      if (!call) return;
-
-      call.on("stream", (peerStream) => {
-        console.log("Received stream from", peerId);
-        dispatch(addPeerStreamAction(peerId, peerStream));
-      });
-
-      call.on("error", console.error);
+      setTimeout(tryCall, 1000);
     };
 
     socket.on("user-joined", handleUserJoined);
@@ -143,7 +148,7 @@ const Room = () => {
     return () => {
       socket.off("user-joined", handleUserJoined);
     };
-  }, [me, streamRef]);
+  }, [me, streamRef.current, dispatch]);
 
   const handleToggleVideo = () => {
     if (isVideoOff) {
@@ -173,6 +178,11 @@ const Room = () => {
     socket.emit("end-call", { roomId: id });
     getMessages(user);
     navigate("/direct");
+    stream?.getTracks().forEach((track) => {
+      if (track.readyState == "live") {
+        track.stop();
+      }
+    });
   };
 
   const handleClose = () => {
@@ -182,6 +192,11 @@ const Room = () => {
     setIsOpen(false);
     getMessages(user);
     navigate("/direct");
+    stream?.getTracks().forEach((track) => {
+      if (track.readyState == "live") {
+        track.stop();
+      }
+    });
   };
 
   const getUserName = (state: "full" | "initials") => {
@@ -210,12 +225,6 @@ const Room = () => {
       <div className="sticky top-0 left-0 right-0 z-30">
         <div className="flex items-center justify-between px-4 md:px-6 py-3 md:py-4 max-w-7xl mx-aut">
           <div className="flex items-center gap-3 md:gap-6">
-            {/* <div className="flex items-center gap-2 text-emerald-50/90">
-              <Clock className="w-3.5 h-3.5 md:w-4 md:h-4 text-emerald-400" />
-              <span className="text-xs md:text-sm font-medium tabular-nums">
-                {formatDuration(callDuration)}
-              </span>
-            </div> */}
             <div className="flex items-center gap-2 text-emerald-50/90">
               <Users className="w-3.5 h-3.5 md:w-4 md:h-4 text-emerald-400" />
               <span className="text-xs md:text-sm font-medium">
