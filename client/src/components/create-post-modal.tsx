@@ -185,7 +185,7 @@ const CreatePostModal = ({ isOpen, onOpenChange }: ModalType) => {
           </Button>
           <Button
             onClick={handleCreatePost}
-            disabled={!file || !description.trim() || isLoading}
+            disabled={(!file && !description.trim()) || isLoading}
             className="text-white"
           >
             {isLoading ? <Loader2 className="animate-spin w-5 h-5" /> : "Save"}

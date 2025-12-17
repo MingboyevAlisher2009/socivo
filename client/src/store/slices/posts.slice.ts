@@ -8,6 +8,8 @@ import type { StateCreator } from "zustand";
 export interface PostsSlice {
     posts: Post[] | null
     post: Post | null
+    sentPostIds: string[];
+    hasMore: boolean
     isLoading: boolean
     commentLoading: boolean
     postLoading: boolean
@@ -18,6 +20,7 @@ export interface PostsSlice {
 
     getPosts: () => Promise<void>
     getPost: (id: string) => Promise<void>
+    fetchMorePosts: () => Promise<void>
     handleLike: (post_id: string) => Promise<void>
     addLike: (like: Like) => void
     addComment: (comment: Comment) => void
@@ -28,6 +31,8 @@ export interface PostsSlice {
 const postsSlice: StateCreator<PostsSlice> = (set, get) => ({
     posts: null,
     post: null,
+    sentPostIds: [],
+    hasMore: true,
     isLoading: false,
     commentLoading: false,
     postLoading: false,
@@ -57,6 +62,32 @@ const postsSlice: StateCreator<PostsSlice> = (set, get) => ({
             console.log(error);
         } finally {
             set({ postLoading: false });
+        }
+    },
+
+    fetchMorePosts: async () => {
+        const { posts = [], sentPostIds, isLoading, hasMore } = get();
+        if (isLoading || !hasMore) return;
+
+        set({ isLoading: true });
+
+        try {
+            const exclude = sentPostIds.join(",");
+            const { data } = await axiosInstance.get<{
+                data: Post[];
+            }>(`/posts?exclude=${exclude}&limit=10`);
+
+            if (data.data.length > 0) return
+
+            set({
+                posts: [...posts as any, ...data.data],
+                sentPostIds: [...sentPostIds, ...data.data.map((p) => p.id)],
+                hasMore: data.data.length > 0,
+            });
+        } catch (error) {
+            console.error(error);
+        } finally {
+            set({ isLoading: false });
         }
     },
 

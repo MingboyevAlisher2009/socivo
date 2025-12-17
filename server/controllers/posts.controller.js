@@ -1,6 +1,4 @@
 import pool from "../config/db.js";
-import BaseError from "../error/base.error.js";
-import { existsSync, renameSync, unlinkSync } from "fs";
 import { sendComment, sendLike, sendNotifications } from "../socket.js";
 import cloudinary from "../config/cloudinary.js";
 
@@ -20,12 +18,9 @@ const successResponse = (res, status, data) => {
 
 export const getPosts = async (req, res, next) => {
   const { userId } = req;
-  const { page = 1, limit = 20 } = req.query;
+  const { page = 1, limit = 50 } = req.query;
 
-  const pageNumber = parseInt(page, 10);
   const limitNumber = parseInt(limit, 10);
-
-  const offset = (pageNumber - 1) * limitNumber;
 
   try {
     const { rows } = await pool.query(
@@ -83,9 +78,9 @@ export const getPosts = async (req, res, next) => {
 
       GROUP BY posts.id, users.id
       ORDER BY RANDOM()
-      LIMIT $1 OFFSET $2;
+      LIMIT $1;
      `,
-      [limitNumber, offset]
+      [limitNumber]
     );
 
     const posts = rows.map((post) => {
@@ -209,15 +204,11 @@ export const createPost = async (req, res, next) => {
   const file = req.file;
 
   try {
-    if (!content) {
-      return BaseError.BadRequest(
-        "Content is required. Please enter your preferences."
-      );
-    } else if (!file) {
-      return BaseError.BadRequest("Please share your photo. ");
+    if (!file) {
+      return errorResponse(res, 404, "Please share your photo or capture. ");
     }
 
-    const imageUrl = await cloudinary.uploader.upload(req.file.path, {
+    const imageUrl = await cloudinary.uploader.upload(file.path, {
       folder: "posts",
     });
 
@@ -362,8 +353,6 @@ export const like = async (req, res, next) => {
       JOIN users u ON i.user_id = u.id;`,
         [userId, post_id]
       );
-      console.log(rows);
-
       sendLike({
         ...rows[0],
         isLiked: rows[0].user_id === userId,
@@ -371,6 +360,17 @@ export const like = async (req, res, next) => {
       });
 
       if (rows[0].author.id !== userId) {
+        const { rowCount } = await pool.query(
+          `SELECT 1 FROM notifications
+            WHERE post_id = $1 
+              AND sender_id = $2 
+              AND receiver_id = $3 
+              AND type = $4`,
+          [post_id, userId, rows[0].author.id, "like"]
+        );
+
+        if (rowCount) return;
+
         const { rows: notifications } = await pool.query(
           `WITH inserted AS (
             INSERT INTO notifications (sender_id, receiver_id, type, post_id)
@@ -463,7 +463,6 @@ export const comment = async (req, res, next) => {
       [userId, post_id, comment]
     );
     sendComment(rows[0]);
-    console.log(rows[0]);
     if (rows[0].p_author.id !== userId) {
       const { rows: notifications } = await pool.query(
         `WITH inserted AS (
@@ -558,7 +557,7 @@ export const deletePost = async (req, res, next) => {
       return errorResponse(res, 403, "Author can delete this post.");
     }
 
-    const publicId = "posts/" + image.split("/posts/")[1]?.split(".")[0];
+    const publicId = "posts/" + post.image.split("/posts/")[1]?.split(".")[0];
     await cloudinary.uploader.destroy(publicId);
 
     await pool.query(`DELETE FROM posts WHERE id = $1`, [id]);

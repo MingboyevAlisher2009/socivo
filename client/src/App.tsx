@@ -30,8 +30,9 @@ const LoadingScreen = () => (
 
 const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, isLoaded } = useUser();
+  const { loading } = useAppStore();
 
-  if (!isLoaded) {
+  if (!isLoaded || loading) {
     return <LoadingScreen />;
   }
   if (!user) return <Navigate to="/auth/login" replace />;
@@ -41,9 +42,10 @@ const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
 
 const PublicRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, isLoaded } = useUser();
+  const { loading } = useAppStore();
   const lastroute = sessionStorage.getItem("lastRoute");
 
-  if (!isLoaded) return <LoadingScreen />;
+  if (!isLoaded || loading) return <LoadingScreen />;
   return user ? <Navigate to={lastroute || "/"} replace /> : <>{children}</>;
 };
 

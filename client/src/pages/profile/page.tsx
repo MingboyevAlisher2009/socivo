@@ -459,9 +459,11 @@ const Profile = () => {
                   ({stats.posts})
                 </span>
               </motion.h2>
-              <Button onClick={() => setIsOpen(true)} variant={"ghost"}>
-                <Plus />
-              </Button>
+              {isOwnProfile && (
+                <Button onClick={() => setIsOpen(true)} variant={"ghost"}>
+                  <Plus />
+                </Button>
+              )}
             </div>
 
             {user?.posts && (
@@ -488,11 +490,11 @@ const Profile = () => {
                     layout
                   >
                     <Card className="group overflow-hidden border-0 p-0 shadow-sm hover:shadow-md transition-all duration-200">
-                      <CardContent className="p-0 relative aspect-square">
+                      <CardContent className="p-0 relative aspect-square max-h-64">
                         <motion.img
                           src={post.image as string}
                           alt={post.content}
-                          className="w-full h-52 object-cover"
+                          className="w-full h-full object-cover"
                           whileHover={{ scale: 1.05 }}
                           transition={{ duration: 0.3 }}
                         />
