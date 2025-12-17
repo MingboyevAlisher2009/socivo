@@ -17,7 +17,7 @@ const syncUser = inngest.createFunction(
         [id]
       );
 
-      if (username === rows[0].email.split("@")[0]) {
+      if (rows.length && username === rows[0].email.split("@")[0]) {
         username = `${username}-${Math.random().toString(36).slice(2, 8)}`;
       }
 
