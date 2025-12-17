@@ -1,9 +1,9 @@
 import { compare, hash } from "bcrypt";
-import BaseError from "../error/base.error.js";
 import mailService from "../services/mail.service.js";
 import { generateToken } from "../services/token.service.js";
-import { existsSync, renameSync, unlinkSync } from "fs";
+import { existsSync, unlinkSync } from "fs";
 import pool from "../config/db.js";
+import cloudinary from "../config/cloudinary.js";
 
 const validEmail = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
@@ -276,7 +276,7 @@ export const search = async (req, res, next) => {
     const searchTerm = `%${identify.trim()}%`;
 
     const { rows: users } = await pool.query(
-      `SELECT id, username, email, first_name, last_name, avatar, is_verified, created_at
+      `SELECT id, username, email, first_name, last_name, avatar, created_at
        FROM users
        WHERE email ILIKE $1 OR username ILIKE $1;`,
       [searchTerm]
@@ -347,33 +347,17 @@ export const updateAvatar = async (req, res, next) => {
       return errorResponse(res, 400, "Avatar file is required.");
     }
 
-    const date = Date.now();
-    const fileName = `uploads/avatars/${date}-${file.originalname}`;
-
-    try {
-      renameSync(file.path, fileName);
-    } catch (error) {
-      console.log(error);
-      return errorResponse(res, 500, "Error saving image");
-    }
-
-    if (!existsSync(fileName)) {
-      return errorResponse(res, 400, "File upload failed.");
-    }
+    const imageUrl = await cloudinary.uploader.upload(req.file.path, {
+      folder: "avatar",
+    });
 
     const { rows } = await pool.query(
       `UPDATE users SET avatar = $1 WHERE id = $2;`,
-      [`${process.env.SERVER_URL}/${fileName}`, userId]
+      [imageUrl.secure_url, userId]
     );
 
     if (!rows) {
-      unlinkSync(fileName);
       return errorResponse(res, 404, "User not found");
-    }
-
-    if (user.avatar && existsSync(user.avatar)) {
-      unlinkSync(user.avatar);
-      return;
     }
 
     return successResponse(res, 200, {
@@ -403,18 +387,9 @@ export const deleteAvatar = async (req, res, next) => {
       return errorResponse(res, 404, "User not found");
     }
 
-    const filePath = user.avatar
-      ? `uploads${user.avatar.split("uploads").pop() || ""}`
-      : null;
+    const publicId = "avatar/" + image.split("/avatar/")[1]?.split(".")[0];
+    await cloudinary.uploader.destroy(publicId);
 
-    if (filePath && existsSync(filePath)) {
-      try {
-        unlinkSync(filePath);
-      } catch (error) {
-        console.error("File deletion error:", error);
-        return errorResponse(res, 500, "Error removing image file");
-      }
-    }
     await pool.query(`UPDATE users SET avatar = null WHERE id = $1;`, [userId]);
 
     return successResponse(res, 201, "Profile image removed successfully");

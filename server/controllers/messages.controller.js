@@ -1,7 +1,6 @@
-import path from "path";
 import pool from "../config/db.js";
 import { sendSocketMessage } from "../socket.js";
-import { existsSync, mkdirSync, readdirSync, renameSync, rmSync } from "fs";
+import cloudinary from "../config/cloudinary.js";
 
 const errorResponse = (res, status, message) => {
   return res.status(status).json({
@@ -262,38 +261,22 @@ export const uploadImage = async (req, res, next) => {
       return res.status(400).json({ error: "Image is required." });
     }
 
-    const date = Date.now();
-    let imageDie = `uploads/images/${date}`;
-    let imageName = `${imageDie}/${req.file.originalname}`;
+    const imageUrl = await cloudinary.uploader.upload(req.file.path, {
+      folder: "images",
+    });
 
-    mkdirSync(imageDie, { recursive: true });
-
-    renameSync(req.file.path, imageName);
-
-    successResponse(res, 201, `${process.env.SERVER_URL}/${imageName}`);
+    successResponse(res, 201, imageUrl.secure_url);
   } catch (error) {
     console.log("Uploading image error:", error);
     next(error);
   }
 };
 
-export const deleteImage = (req, res, next) => {
+export const deleteImage = async (req, res, next) => {
   const { image } = req.query;
   try {
-    const imagePath = image
-      ? `uploads${image.split("uploads").pop() || ""}`
-      : null;
-    if (existsSync(imagePath)) {
-      rmSync(imagePath, { force: true });
-      console.log(`File deleted: ${imagePath}`);
-    }
-
-    const folderPath = path.dirname(imagePath);
-
-    if (existsSync(folderPath) && !readdirSync(folderPath).length) {
-      rmSync(folderPath, { recursive: true, force: true });
-      console.log(`Folder deleted: ${folderPath}`);
-    }
+    const publicId = "images/" + image.split("/images/")[1]?.split(".")[0];
+    await cloudinary.uploader.destroy(publicId);
 
     successResponse(res, 200, "Image succesfully deleted");
   } catch (error) {

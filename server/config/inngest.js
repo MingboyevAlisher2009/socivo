@@ -10,10 +10,27 @@ const syncUser = inngest.createFunction(
     try {
       const { id, email_addresses, first_name, last_name, image_url } =
         event.data;
+      let username = email_addresses[0].email_address.split("@")[0];
+
+      const { rows } = await pool.query(
+        `SELECT email FROM users WHERE clerk_id = $1`,
+        [id]
+      );
+
+      if (username === rows[0].email.split("@")[0]) {
+        username = `${username}-${Math.random().toString(36).slice(2, 8)}`;
+      }
 
       await pool.query(
-        `INSERT INTO users (clerk_id, email, first_name, last_name, avatar) VALUES($1, $2, $3, $4, $5);`,
-        [id, email_addresses[0].email_address, first_name, last_name, image_url]
+        `INSERT INTO users (clerk_id, username, email, first_name, last_name, avatar) VALUES($1, $2, $3, $4, $5, $6);`,
+        [
+          id,
+          username,
+          email_addresses[0].email_address,
+          first_name,
+          last_name,
+          image_url,
+        ]
       );
     } catch (error) {
       console.log(error);

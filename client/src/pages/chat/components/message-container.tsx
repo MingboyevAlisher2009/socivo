@@ -10,6 +10,7 @@ import type { Message } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import axiosInstance from "@/http/axios";
+import { cn } from "@/lib/utils";
 const MessageContainer = () => {
   const socket: any = useSocket();
   const [selectedImage, setSelectedImage] = useState("");
@@ -96,11 +97,12 @@ const MessageContainer = () => {
                           message.reply?.sender.id !== userInfo?.id
                         )
                       }
-                      className={
+                      className={cn(
+                        "flex",
                         isOtherUser
-                          ? "border-l-4 pl-2 border-muted"
-                          : "border-r-4 pr-2 border-muted"
-                      }
+                          ? "border-l-4 pl-2 border-muted justify-start"
+                          : "border-r-4 pr-2 border-muted justify-end"
+                      )}
                     >
                       <div
                         className={`relative cursor-pointer w-fit line-clamp-4 rounded-2xl px-3 opacity-[0.4] py-2 text-sm shadow-sm whitespace-pre-wrap break-all transition ${
@@ -183,7 +185,8 @@ const MessageContainer = () => {
                               )}${message?.sender.last_name
                                 .charAt(0)
                                 .toUpperCase()}`
-                            : message?.sender?.username && message?.sender?.username.charAt(0).toUpperCase()}
+                            : message?.sender?.username &&
+                              message?.sender?.username.charAt(0).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
                     )}

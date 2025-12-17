@@ -195,7 +195,9 @@ export default function PostsFeed() {
                   <Card className="w-full">
                     <CardHeader>
                       <Link
-                        to={`/profile/${post.author.username}`}
+                        to={`/profile/${
+                          post.author.username || post.author.id
+                        }`}
                         className="flex flex-row items-center gap-3 pb-4"
                       >
                         <Avatar className="h-10 w-10">

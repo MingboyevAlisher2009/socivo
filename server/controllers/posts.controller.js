@@ -2,6 +2,7 @@ import pool from "../config/db.js";
 import BaseError from "../error/base.error.js";
 import { existsSync, renameSync, unlinkSync } from "fs";
 import { sendComment, sendLike, sendNotifications } from "../socket.js";
+import cloudinary from "../config/cloudinary.js";
 
 const errorResponse = (res, status, message) => {
   return res.status(status).json({
@@ -216,18 +217,13 @@ export const createPost = async (req, res, next) => {
       return BaseError.BadRequest("Please share your photo. ");
     }
 
-    const date = new Date().toISOString().replace(/[:.]/g, "-");
-    const filename = `uploads/posts/${date}-${file.originalname}`;
-
-    if (file.path && existsSync(file.path)) {
-      renameSync(file.path, filename);
-    } else {
-      return errorResponse(res, 500, "Photo upload failed");
-    }
+    const imageUrl = await cloudinary.uploader.upload(req.file.path, {
+      folder: "posts",
+    });
 
     await pool.query(
       `INSERT INTO posts (user_id, content, image) VALUES ($1, $2, $3);`,
-      [userId, content, `${process.env.SERVER_URL}/${filename}`]
+      [userId, content, imageUrl.secure_url]
     );
 
     return successResponse(res, 201, "Post created succefully.");
@@ -562,13 +558,8 @@ export const deletePost = async (req, res, next) => {
       return errorResponse(res, 403, "Author can delete this post.");
     }
 
-    const imagePath = post.image
-      ? `uploads${post.image.split("uploads").pop() || ""}`
-      : null;
-
-    if (imagePath && existsSync(imagePath)) {
-      unlinkSync(imagePath);
-    }
+    const publicId = "posts/" + image.split("/posts/")[1]?.split(".")[0];
+    await cloudinary.uploader.destroy(publicId);
 
     await pool.query(`DELETE FROM posts WHERE id = $1`, [id]);
 
