@@ -89,7 +89,7 @@ const ChatHeader = () => {
           className="cursor-pointer"
           onClick={() => handleCall("video_call")}
           variant={"ghost"}
-          disabled
+          // disabled
         >
           <Video className="w-20 h-20" />
         </Button>
@@ -97,7 +97,7 @@ const ChatHeader = () => {
           className="cursor-pointer"
           onClick={() => handleCall("call")}
           variant={"ghost"}
-          disabled
+          // disabled
         >
           <Phone className="w-20 h-20" />
         </Button>

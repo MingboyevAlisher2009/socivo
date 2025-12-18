@@ -38,17 +38,7 @@ const Room = () => {
   const [isVideoOff, setIsVideoOff] = useState(false);
   const [isUserMuted, setIsUserMuted] = useState(false);
   const [isUserVideoOff, setisUserVideoOff] = useState(false);
-  // const [callDuration, setCallDuration] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
-
-  // const formatDuration = (seconds: number) => {
-  //   const hrs = Math.floor(seconds / 3600);
-  //   const mins = Math.floor((seconds % 3600) / 60);
-  //   const secs = seconds % 60;
-  //   return `${hrs.toString().padStart(2, "0")}:${mins
-  //     .toString()
-  //     .padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
-  // };
 
   useEffect(() => {
     if (!userInfo?.id) return;
@@ -65,22 +55,42 @@ const Room = () => {
     }
 
     const peer = new Peer(userInfo.id, {
-      host: "localhost",
+      host: import.meta.env.VITE_PEER_HOST || "localhost",
       port: 9000,
       path: "/",
     });
 
     peer.on("open", (peerId) => {
       setMe(peer);
-      socket.emit("join-room", { peerId, roomId: id });
+
+      if (streamRef.current) {
+        socket.emit("join-room", { peerId, roomId: id, ready: true });
+      } else {
+        const checkStream = setInterval(() => {
+          if (streamRef.current) {
+            socket.emit("join-room", { peerId, roomId: id, ready: true });
+            clearInterval(checkStream);
+          }
+        }, 100);
+      }
     });
 
     const handleIncomingCall = (call: any) => {
-      call.answer(stream);
+      if (!streamRef.current) {
+        const interval = setInterval(() => {
+          if (streamRef.current) {
+            call.answer(streamRef.current);
+            clearInterval(interval);
+          }
+        }, 100);
+        return;
+      }
+      call.answer(streamRef.current);
+
       call.on("stream", (peerStream: any) => {
-        alert("peer 1");
         dispatch(addPeerStreamAction(call.peer, peerStream));
       });
+
       call.on("error", (err: any) => console.error("Call error:", err));
     };
 
@@ -126,21 +136,14 @@ const Room = () => {
 
     const handleUserJoined = ({ peerId }: { peerId: string }) => {
       if (peerId === me.id) return;
-      const tryCall = () => {
-        if (!streamRef.current) {
-          console.warn("No stream yet, cannot call", peerId);
-          return;
-        }
-        const call = me.call(peerId, streamRef.current);
-        if (!call) return;
-        call.on("stream", (peerStream) => {
-          alert("peer 2");
-          dispatch(addPeerStreamAction(peerId, peerStream));
-        });
-        call.on("error", console.error);
-      };
 
-      setTimeout(tryCall, 1000);
+      if (!streamRef.current) return;
+
+      const call = me.call(peerId, streamRef.current);
+      call.on("stream", (peerStream) => {
+        dispatch(addPeerStreamAction(peerId, peerStream));
+      });
+      call.on("error", console.error);
     };
 
     socket.on("user-joined", handleUserJoined);

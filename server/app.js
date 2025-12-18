@@ -14,7 +14,6 @@ import { createDatabases } from "./config/db.js";
 import { clerkMiddleware, requireAuth } from "@clerk/express";
 import { serve } from "inngest/express";
 import { functions, inngest } from "./config/inngest.js";
-import { PeerServer } from "peer";
 
 const __dirname = path.resolve();
 const app = express();
@@ -63,6 +62,5 @@ const server = app.listen(PORT, async () => {
   await createDatabases();
   console.log(`Server run on port: http://localhost:${PORT}`);
 });
-PeerServer({ port: 9000, path: "/" });
 
 setupSocket(server);
