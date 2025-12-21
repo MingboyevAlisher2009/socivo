@@ -15,9 +15,6 @@ import {
   VideoOff,
   Monitor,
   Users,
-  Maximize2,
-  MoreVertical,
-  ChevronLeft,
 } from "lucide-react";
 import {
   Dialog,
