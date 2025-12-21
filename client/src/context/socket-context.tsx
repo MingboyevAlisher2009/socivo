@@ -73,6 +73,8 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
     addMessage,
     getReadMessages,
     setTyping,
+    setIsVideoOff,
+    setisUserVideoOff,
   } = useAppStore();
   const notifSound = new Audio("/audio/notification.mp3");
   const selectedChatRef = useRef(selectedChat);
@@ -223,6 +225,9 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
               "selected-chat-data",
               JSON.stringify(sender)
             );
+            const isVideoOff = type !== "video_call" ? true : false;
+            setisUserVideoOff(isVideoOff);
+            setIsVideoOff(isVideoOff);
 
             const toastId = toast(
               <div className="flex items-center gap-4">

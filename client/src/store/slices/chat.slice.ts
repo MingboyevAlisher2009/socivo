@@ -12,6 +12,10 @@ export interface ChatSlice {
     image: string | null,
     selectedChat: ChatUser | null
     typing: Message | null
+    isMuted: boolean
+    isVideoOff: boolean
+    isUserMuted: boolean
+    isUserVideoOff: boolean
     isSoundEnabled: boolean
     contactLoading: boolean
     messageLoading: boolean
@@ -26,6 +30,10 @@ export interface ChatSlice {
 
     getContacts: () => Promise<void>
     getMessages: (selectedChat: ChatUser) => Promise<void>
+    setIsMuted: (isMuted: boolean) => void
+    setIsVideoOff: (isVideoOff: boolean) => void
+    setIsUserMuted: (isUserMuted: boolean) => void
+    setisUserVideoOff: (isUserVideoOff: boolean) => void
     sendMessage: (message: string) => Promise<void>
     uploadImage: (file: any) => Promise<void>
     deleteImage: () => Promise<void>,
@@ -42,6 +50,10 @@ const chatSlice: StateCreator<ChatSlice> = (set, get) => ({
     image: localStorage.getItem("image"),
     selectedChat: null,
     typing: null,
+    isMuted: false,
+    isVideoOff: false,
+    isUserMuted: false,
+    isUserVideoOff: false,
     isSoundEnabled: JSON.parse(localStorage.getItem("isSoundEnabled") as any) === true,
     contactLoading: false,
     messageLoading: false,
@@ -53,6 +65,10 @@ const chatSlice: StateCreator<ChatSlice> = (set, get) => ({
     setMessages: (messages) => set({ messages }),
     setReply: (reply) => set({ reply }),
     setTyping: (typing) => set({ typing }),
+    setIsMuted: (isMuted) => set({ isMuted }),
+    setIsVideoOff: (isVideoOff) => set({ isVideoOff }),
+    setIsUserMuted: (isUserMuted) => set({ isUserMuted }),
+    setisUserVideoOff: (isUserVideoOff) => set({ isUserVideoOff }),
 
     getContacts: async () => {
         set({ contactLoading: true })

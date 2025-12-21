@@ -153,10 +153,12 @@ const MessageContainer = () => {
                           )
                         )}
                         {message.reply.image && (
-                          <Image
-                            className="rounded-2xl max-h-80 object-cover mb-2 cursor-pointer hover:opacity-90 transition"
-                            url={message.reply.image}
-                          />
+                          <div className="w-full max-h-80">
+                            <Image
+                              className="rounded-2xl object-cover mb-2 cursor-pointer hover:opacity-90 transition"
+                              url={message.reply.image}
+                            />
+                          </div>
                         )}
 
                         {message.reply.message}
@@ -244,6 +246,7 @@ const MessageContainer = () => {
                       )}
                       {message.image && (
                         <div
+                          className="w-full"
                           onClick={() =>
                             setSelectedImage(message.image as string)
                           }
@@ -330,7 +333,7 @@ const MessageContainer = () => {
       )}
       <div ref={messageEndRef} />
       <Dialog open={!!selectedImage} onOpenChange={() => setSelectedImage("")}>
-        <DialogContent className="w-fit p-0">
+        <DialogContent className="w-5xl p-0">
           <Image className="rounded-lg" url={selectedImage} />
         </DialogContent>
       </Dialog>

@@ -4,13 +4,25 @@ import { useSocket } from "@/context/socket-context";
 import axiosInstance from "@/http/axios";
 import { useAppStore } from "@/store";
 import { AxiosError } from "axios";
-import { Phone, Video, X } from "lucide-react";
+import { Loader2, Phone, Video, X } from "lucide-react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
 const ChatHeader = () => {
-  const { userInfo, selectedChat, closeContact, onlineUsers, typing } =
-    useAppStore();
+  const {
+    userInfo,
+    selectedChat,
+    closeContact,
+    onlineUsers,
+    typing,
+    setIsVideoOff,
+    setisUserVideoOff,
+  } = useAppStore();
+  const [isLoading, setisLoading] = useState({
+    type: "",
+    loading: false,
+  });
   const navigate = useNavigate();
   const socket: any = useSocket();
 
@@ -23,11 +35,15 @@ const ChatHeader = () => {
   );
 
   const handleCall = async (type: "video_call" | "call") => {
+    setisLoading({ type, loading: true });
     try {
       const { data } = await axiosInstance.post("/messages/send-message", {
         recipient: selectedChat,
         type,
       });
+      const isVideoOff = type !== "video_call" ? true : false;
+      setIsVideoOff(isVideoOff);
+      setisUserVideoOff(isVideoOff);
       navigate(`/room/${data.data.id}`);
       socket.emit("create-room", {
         roomId: data.data.id || "",
@@ -43,6 +59,8 @@ const ChatHeader = () => {
           : "Something went wrong. Please try again.";
 
       toast.error(message);
+    } finally {
+      setisLoading({ type: "", loading: false });
     }
   };
 
@@ -89,17 +107,25 @@ const ChatHeader = () => {
           className="cursor-pointer"
           onClick={() => handleCall("video_call")}
           variant={"ghost"}
-          // disabled
+          disabled={isLoading.loading}
         >
-          <Video className="w-20 h-20" />
+          {isLoading.loading && isLoading.type === "video_call" ? (
+            <Loader2 className="animate-spin" />
+          ) : (
+            <Video className="w-20 h-20" />
+          )}
         </Button>
         <Button
           className="cursor-pointer"
           onClick={() => handleCall("call")}
           variant={"ghost"}
-          // disabled
+          disabled={isLoading.loading}
         >
-          <Phone className="w-20 h-20" />
+          {isLoading.loading && isLoading.type === "call" ? (
+            <Loader2 className="animate-spin" />
+          ) : (
+            <Phone className="w-20 h-20" />
+          )}
         </Button>
         <Button
           className="cursor-pointer"

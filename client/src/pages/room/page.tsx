@@ -15,6 +15,9 @@ import {
   VideoOff,
   Monitor,
   Users,
+  Maximize2,
+  MoreVertical,
+  ChevronLeft,
 } from "lucide-react";
 import {
   Dialog,
@@ -25,22 +28,31 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { PeerLoader } from "./components/peer-loader";
+import { cn } from "@/lib/utils";
 
 const Room = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const streamRef = useRef<MediaStream | null>(null);
-  const { userInfo, getMessages } = useAppStore();
+  const {
+    userInfo,
+    getMessages,
+    isMuted,
+    isVideoOff,
+    isUserMuted,
+    isUserVideoOff,
+    setIsMuted,
+    setIsVideoOff,
+    setIsUserMuted,
+    setisUserVideoOff,
+  } = useAppStore();
   const socket: any = useSocket();
   const [me, setMe] = useState<Peer>();
   const [stream, setStream] = useState<MediaStream>();
   const [peers, dispatch] = useReducer(peersReducer, {});
-  const [isMuted, setIsMuted] = useState(false);
-  const [isVideoOff, setIsVideoOff] = useState(false);
-  const [isUserMuted, setIsUserMuted] = useState(false);
-  const [isUserVideoOff, setisUserVideoOff] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [peerReady, setPeerReady] = useState(false);
+  const [switchScreen, setSwitchScreen] = useState("peer");
 
   useEffect(() => {
     if (!userInfo?.id) return;
@@ -230,7 +242,7 @@ const Room = () => {
   return (
     <>
       {!peerReady && <PeerLoader />}
-      <div className="relative flex flex-col w-full">
+      <div className="flex flex-col h-[80vh] text-[#e9edef] overflow-hidden">
         <div className="sticky top-0 left-0 right-0 z-30">
           <div className="flex items-center justify-between px-4 md:px-6 py-3 md:py-4 max-w-7xl mx-aut">
             <div className="flex items-center gap-3 md:gap-6">
@@ -248,133 +260,150 @@ const Room = () => {
           </div>
         </div>
 
-        <div className="flex-1 flex items-center justify-center p-3 sm:p-6 md:p-8 pb-32 md:pb-36">
-          <div className="w-full max-w-7xl grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 md:gap-6">
-            <div className="relative w-full">
-              <div className="relative aspect-video rounded-xl md:rounded-2xl overflow-hidden bg-slate-900/50 shadow-2xl ring-1 md:ring-2 ring-emerald-500/20 hover:ring-emerald-500/40 transition-all">
+        <div className="flex-1 relative p-4 md:p-6 lg:p-10">
+          <div className="relative w-full h-full flex items-center justify-center">
+            <div
+              onClick={() => setSwitchScreen("peer")}
+              className={cn(
+                switchScreen === "peer"
+                  ? "relative w-full h-full max-w-5xl aspect-video rounded-3xl overflow-hidden"
+                  : "absolute top-4 right-4 md:bottom-6 md:right-6 w-32 h-40 md:w-44 md:h-28 z-40 lg:w-56 lg:h-32 rounded-xl md:rounded-2xl overflow-hidden",
+                "bg-gradient-to-br from-[#0b141a] to-[#121b22]",
+                "border border-primary/50 shadow-xl transition-all duration-500",
+                isUserVideoOff && "flex items-center justify-center"
+              )}
+            >
+              {isUserVideoOff && (
+                <div className="absolute inset-0 flex items-center justify-center z-40 bg-gradient-to-br from-[#0b141a] to-[#121b22]">
+                  <div
+                    className={cn(
+                      "rounded-full bg-emerald-600 flex items-center justify-center font-bold shadow-xl border-2 md:border-4 border-emerald-500/20",
+                      switchScreen === "peer"
+                        ? "w-32 h-32 text-4xl"
+                        : "w-20 h-20"
+                    )}
+                  >
+                    {getUserName("initials")}
+                  </div>
+                </div>
+              )}
+              {Object.values(peers).length && (
                 <VideoPlayer
                   className="w-full h-full object-cover"
-                  stream={stream as any}
-                  mute={true}
+                  stream={Object.values(peers as PeerState)[0].stream as any}
+                  mute={isUserMuted}
                 />
+              )}
 
-                {isVideoOff && (
-                  <div className="absolute inset-0 bg-gradient-to-br from-emerald-900 via-slate-800 to-emerald-950 flex items-center justify-center">
-                    <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-full bg-gradient-to-br from-emerald-500 via-emerald-600 to-teal-600 text-white flex items-center justify-center text-lg sm:text-xl md:text-2xl font-bold shadow-2xl ring-4 ring-emerald-500/20">
-                      You
-                    </div>
-                  </div>
-                )}
-
-                <div className="absolute bottom-2 md:bottom-4 left-2 md:left-4 px-2 md:px-4 py-1.5 md:py-2 flex gap-1.5 md:gap-2 items-center bg-emerald-950/80 backdrop-blur-md rounded-lg md:rounded-xl text-xs md:text-sm text-emerald-50 font-medium shadow-lg border border-emerald-500/20">
-                  <span>You</span>
-                  {isMuted && (
-                    <MicOff className="w-3 h-3 md:w-4 md:h-4 text-red-400" />
-                  )}
-                </div>
+              <div className="absolute bottom-2 left-2 md:bottom-4 md:left-4 z-50 flex items-center gap-1 md:gap-2 px-2 py-1 md:px-3 md:py-1.5 bg-primary/5 backdrop-blur-md rounded-lg text-[10px] md:text-xs font-medium border border-primary/10">
+                <span>{getUserName("full")}</span>
+                {isUserMuted && <MicOff className="w-3 h-3 text-red-500" />}
               </div>
             </div>
 
-            <div className="grid grid-cols-1 gap-3 sm:gap-4 md:gap-6 w-full">
-              {Object.values(peers as PeerState).map((peer, i) => (
-                <div
-                  key={i}
-                  className="relative aspect-video rounded-xl md:rounded-2xl overflow-hidden bg-slate-900/50 shadow-2xl ring-1 md:ring-2 ring-emerald-500/20 hover:ring-emerald-500/40 transition-all"
-                >
-                  <VideoPlayer
-                    mute={isUserMuted}
-                    className="w-full h-full object-cover"
-                    stream={peer.stream as any}
-                  />
-
-                  {isUserVideoOff && (
-                    <div className="absolute inset-0 bg-gradient-to-br from-emerald-900 via-slate-800 to-teal-950 flex items-center justify-center">
-                      <div className="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 rounded-full bg-gradient-to-br from-emerald-400 via-teal-500 to-cyan-500 text-white flex items-center justify-center text-xl sm:text-2xl md:text-3xl font-bold shadow-2xl ring-4 ring-emerald-500/20">
-                        {getUserName("initials")}
-                      </div>
-                    </div>
-                  )}
-
-                  <div className="absolute bottom-2 md:bottom-4 left-2 md:left-4 flex gap-1.5 md:gap-2 items-center px-2 md:px-4 py-1.5 md:py-2 bg-emerald-950/80 backdrop-blur-md rounded-lg md:rounded-xl text-xs md:text-sm text-emerald-50 font-medium shadow-lg border border-emerald-500/20">
-                    <span className="truncate max-w-[120px] sm:max-w-none">
-                      {getUserName("full")}
-                    </span>
-                    {isUserMuted && (
-                      <MicOff className="w-3 h-3 md:w-4 md:h-4 text-red-400" />
+            <div
+              onClick={() => setSwitchScreen("me")}
+              className={cn(
+                switchScreen === "me"
+                  ? "relative w-full h-full max-w-5xl aspect-video rounded-3xl overflow-hidden"
+                  : "absolute top-4 right-4 md:bottom-6 md:right-6 w-32 h-40 md:w-44 md:h-28 z-40 lg:w-56 lg:h-32 rounded-xl md:rounded-2xl overflow-hidden",
+                "bg-gradient-to-br from-[#0b141a] to-[#121b22]",
+                "border border-primary/50 shadow-xl transition-all duration-500",
+                isVideoOff && "flex items-center justify-center"
+              )}
+            >
+              <div className="absolute inset-0 flex items-center justify-center">
+                {isVideoOff ? (
+                  <div
+                    className={cn(
+                      "rounded-full bg-emerald-600 flex items-center justify-center font-bold shadow-xl border-2 md:border-4 border-emerald-500/20",
+                      switchScreen === "me" ? "w-32 h-32 text-4xl" : "w-20 h-20"
                     )}
+                  >
+                    You
                   </div>
-                </div>
-              ))}
+                ) : (
+                  <VideoPlayer
+                    className="w-full h-full object-cover"
+                    stream={stream as any}
+                  />
+                )}
+              </div>
+              <div className="absolute bottom-1 left-1 md:bottom-2 md:left-2 flex w-fit line-clamp-1 items-center gap-1 md:gap-2 px-2 py-1 md:px-3 md:py-1.5 bg-primary/5 backdrop-blur-md rounded-lg text-[10px] md:text-xs font-medium border border-primary/10">
+                <span>You</span>
+                {isMuted && <MicOff className="w-3 h-3 text-red-500" />}
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="fixed bottom-4 sm:bottom-6 md:bottom-8 left-1/2 -translate-x-1/2 z-50 px-4">
-          <div className="bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl px-3 sm:px-6 md:px-8 py-3 sm:py-4 md:py-5 rounded-2xl md:rounded-3xl">
-            <div className="flex items-center justify-center gap-2 sm:gap-3 md:gap-4">
-              <div className="flex flex-col items-center gap-1 md:gap-2">
+        <div className="fixed bottom-0 left-0 right-0 p-4 md:p-8 flex justify-center z-40">
+          <div className="bg-primary/10 backdrop-blur-xl border border-primary/10 shadow-2xl px-6 py-4 rounded-[2.5rem] md:rounded-full">
+            <div className="flex items-center gap-4 md:gap-8">
+              <div className="flex flex-col items-center gap-1.5">
                 <Button
-                  size="lg"
+                  size="icon"
                   variant={isMuted ? "destructive" : "secondary"}
-                  className="h-12 w-12 sm:h-14 sm:w-14 md:h-16 md:w-16 rounded-full transition-all hover:scale-110 shadow-lg hover:shadow-xl hover:shadow-emerald-500/20"
+                  className={cn(
+                    "h-12 w-12 md:h-14 md:w-14 rounded-full transition-transform active:scale-90",
+                    !isMuted && "bg-white/10 hover:bg-white/20 text-white"
+                  )}
                   onClick={handleMute}
                 >
                   {isMuted ? (
-                    <MicOff className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" />
+                    <MicOff className="w-5 h-5 md:w-6 md:h-6" />
                   ) : (
-                    <Mic className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" />
+                    <Mic className="w-5 h-5 md:w-6 md:h-6" />
                   )}
                 </Button>
-                <span className="text-[10px] sm:text-xs text-emerald-100/70 font-medium hidden sm:block">
-                  {isMuted ? "Unmute" : "Mute"}
+                <span className="text-[10px] text-white/50 font-medium hidden md:inline">
+                  Mute
                 </span>
               </div>
 
-              <div className="flex flex-col items-center gap-1 md:gap-2">
+              <div className="flex flex-col items-center gap-1.5">
                 <Button
-                  size="lg"
+                  size="icon"
                   variant={isVideoOff ? "destructive" : "secondary"}
-                  className="h-12 w-12 sm:h-14 sm:w-14 md:h-16 md:w-16 rounded-full transition-all hover:scale-110 shadow-lg hover:shadow-xl hover:shadow-emerald-500/20"
+                  className={cn(
+                    "h-12 w-12 md:h-14 md:w-14 rounded-full transition-transform active:scale-90",
+                    !isVideoOff && "bg-white/10 hover:bg-white/20 text-white"
+                  )}
                   onClick={handleToggleVideo}
                 >
                   {isVideoOff ? (
-                    <VideoOff className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" />
+                    <VideoOff className="w-5 h-5 md:w-6 md:h-6" />
                   ) : (
-                    <VideoIcon className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" />
+                    <VideoIcon className="w-5 h-5 md:w-6 md:h-6" />
                   )}
                 </Button>
-                <span className="text-[10px] sm:text-xs text-emerald-100/70 font-medium hidden sm:block">
-                  {isVideoOff ? "Video" : "Stop"}
+                <span className="text-[10px] text-white/50 font-medium hidden md:inline">
+                  Video
                 </span>
               </div>
 
-              <div className="w-px h-8 sm:h-10 md:h-12 bg-emerald-500/20 mx-1 sm:mx-2"></div>
-
-              <div className="flex flex-col items-center gap-1 md:gap-2">
+              <div className="hidden md:flex flex-col items-center gap-1.5">
                 <Button
-                  size="lg"
-                  variant="secondary"
-                  className="h-12 w-12 sm:h-14 sm:w-14 md:h-16 md:w-16 rounded-full transition-all hover:scale-110 shadow-lg hover:shadow-xl hover:shadow-emerald-500/20"
+                  size="icon"
+                  className="h-12 w-12 md:h-14 md:w-14 rounded-full bg-white/10 hover:bg-white/20 text-white transition-transform active:scale-90"
                 >
-                  <Monitor className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" />
+                  <Monitor className="w-5 h-5 md:w-6 md:h-6" />
                 </Button>
-                <span className="text-[10px] sm:text-xs text-emerald-100/70 font-medium hidden sm:block">
+                <span className="text-[10px] text-white/50 font-medium hidden md:inline">
                   Share
                 </span>
               </div>
 
-              <div className="w-px h-8 sm:h-10 md:h-12 bg-emerald-500/20 mx-1 sm:mx-2"></div>
-
-              <div className="flex flex-col items-center gap-1 md:gap-2">
+              <div className="flex flex-col items-center gap-1.5">
                 <Button
                   onClick={handleEndCall}
-                  size="lg"
+                  size="icon"
                   variant="destructive"
-                  className="h-12 w-12 sm:h-14 sm:w-14 md:h-16 md:w-16 rounded-full transition-all hover:scale-110 shadow-lg hover:shadow-xl bg-red-600 hover:bg-red-700"
+                  className="h-12 w-12 md:h-14 md:w-14 rounded-full bg-[#ea0038] hover:bg-[#ff1a4d] transition-all hover:scale-110 active:scale-95 shadow-[0_0_20px_rgba(234,0,56,0.3)]"
                 >
-                  <Phone className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 rotate-[135deg]" />
+                  <Phone className="w-5 h-5 md:w-6 md:h-6 rotate-[135deg] fill-white" />
                 </Button>
-                <span className="text-[10px] sm:text-xs text-emerald-100/70 font-medium hidden sm:block">
+                <span className="text-[10px] text-white/50 font-medium hidden md:inline">
                   End
                 </span>
               </div>
@@ -390,7 +419,7 @@ const Room = () => {
               </DialogDescription>
             </DialogHeader>
             <DialogFooter>
-              <Button onClick={handleClose}>Close</Button>
+              <Button onClick={handleClose}>Done</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

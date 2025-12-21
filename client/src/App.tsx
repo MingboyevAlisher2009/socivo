@@ -1,5 +1,5 @@
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useAppStore } from "./store";
 import Home from "./pages/home/page";
 import Login from "./pages/auth/login";
@@ -14,6 +14,7 @@ import NotFoundPage from "./pages/page-not-found/page";
 import Chat from "./pages/chat/page";
 import Room from "./pages/room/page";
 import { useUser } from "@clerk/clerk-react";
+import { OfflineModal } from "./components/offline-modal";
 
 const LoadingScreen = () => (
   <div className="fixed inset-0 z-50 w-full h-screen flex items-center justify-center bg-background backdrop-blur-sm">
@@ -51,6 +52,7 @@ const PublicRoute = ({ children }: { children: React.ReactNode }) => {
 
 const App = () => {
   const { getUserInfo, getNotifications, userInfo } = useAppStore();
+  const [online, setOnline] = useState<boolean>(navigator.onLine);
   const { pathname } = useLocation();
 
   useEffect(() => {
@@ -62,6 +64,19 @@ const App = () => {
   useEffect(() => {
     getUserInfo();
     getNotifications();
+  }, []);
+
+  useEffect(() => {
+    const onOnline = () => setOnline(true);
+    const onOffline = () => setOnline(false);
+
+    window.addEventListener("online", onOnline);
+    window.addEventListener("offline", onOffline);
+
+    return () => {
+      window.removeEventListener("online", onOnline);
+      window.removeEventListener("offline", onOffline);
+    };
   }, []);
 
   return (
@@ -153,6 +168,7 @@ const App = () => {
         </Route>
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
+      <OfflineModal open={!online} />
     </>
   );
 };
